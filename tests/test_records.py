@@ -6,20 +6,20 @@ def test_normalize_book_preserves_multilingual_metadata_and_search_fields():
         "id": "book-1",
         "dc.type": "book",
         "dc.title": "  Études   sur   日本語 ",
-        "dc.title.alternative": "Japanese Studies; Estudios japoneses",
-        "dc.contributor.author": "Smith, Ana;山田 太郎",
-        "dc.subject.other": "linguistics;日本語",
-        "dc.subject.classification.description": "Language and Linguistics;Asia",
+        "dc.title.alternative": "Japanese Studies||Estudios japoneses",
+        "dc.contributor.author": "Smith, Ana||山田 太郎",
+        "dc.subject.other": "linguistics||日本語",
+        "dc.subject.classification": "Language and Linguistics||Asia",
         "dc.description.abstract": "<p>Research on <em>language</em> &amp; culture.</p>",
         "oapen.abstract.otherlanguage": "日本語の研究",
-        "dc.language": "fre;jpn",
+        "dc.language": "French[fre]||Japanese[jpn]",
         "dc.date.issued": "2021-04",
-        "BITSTREAM_ISBN": "9781111111111",
+        "BITSTREAM ISBN": "9781111111111",
         "oapen.relation.isbn": "9782222222222",
         "oapen.identifier.doi": "https://doi.org/10.1234/example",
         "dc.identifier.uri": "https://directory.doabooks.org/handle/123",
-        "BITSTREAM_Download_URL": "https://example.org/book.pdf",
-        "BITSTREAM_License": "https://creativecommons.org/licenses/by/4.0/",
+        "BITSTREAM Download URL": "https://example.org/book.pdf",
+        "BITSTREAM License": "https://creativecommons.org/licenses/by/4.0/",
         "oapen.relation.isPublishedBy_publisher.name": "Test Press",
     }
 
@@ -38,6 +38,8 @@ def test_normalize_book_preserves_multilingual_metadata_and_search_fields():
     assert book["isbns"] == ["9781111111111", "9782222222222"]
     assert book["doi"] == "10.1234/example"
     assert book["publisher"] == "Test Press"
+    assert book["download_url"] == "https://example.org/book.pdf"
+    assert book["license_url"] == "https://creativecommons.org/licenses/by/4.0/"
     assert "Études sur 日本語" in book["semantic_text"]
     assert "日本語の研究" in book["semantic_text"]
     assert "Language and Linguistics" not in book["semantic_text"]

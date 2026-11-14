@@ -13,7 +13,7 @@ import pyarrow.parquet as pq
 
 from libraries_data.records import normalize_book
 from libraries_data.schema import BOOK_SCHEMA, SCHEMA_VERSION
-from libraries_data.source import DOAB_OAI_URL, fetch_rows
+from libraries_data.source import DOAB_EXPORT_URL, fetch_rows
 
 BATCH_SIZE = 5_000
 DEFAULT_MIN_BOOKS = 100_000
@@ -152,7 +152,7 @@ def prepare_catalog(
 def main() -> None:
     parser = argparse.ArgumentParser(description="Prepare DOAB book metadata for Hugging Face")
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--source-url", default=DOAB_OAI_URL)
+    parser.add_argument("--source-url", default=DOAB_EXPORT_URL)
     parser.add_argument("--minimum-books", type=int, default=DEFAULT_MIN_BOOKS)
     args = parser.parse_args()
     if args.minimum_books < 1:
