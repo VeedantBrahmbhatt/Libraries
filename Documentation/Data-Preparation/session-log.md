@@ -18,6 +18,7 @@ Prepare the complete DOAB book metadata catalog for a later NYU-focused semantic
 10. Queried DOAB's OAI-PMH `ListIdentifiers` and `ListRecords` endpoints. The feed reported about 129,000 rows, including chapters and deleted records. Replaced the smaller CSV source with paginated `oai_dc` harvesting, added pagination and completeness tests, and raised the book-count gate to 100,000.
 11. The complete OAI cloud run [#2](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43651699801) stopped before upload: 129,746 source rows, 25,415 non-book rows, 19,160 repeated book IDs, and 85,171 unique books. This result did not meet the full-collection objective. The 100,000-book gate prevented the incomplete result from replacing the first snapshot.
 12. Located DOAB's separate direct full repository export at `https://directory.doabooks.org/download-export?format=csv`, linked from its official FAQ. Its response is about 268 MB and its 138-column header includes book metadata beyond the smaller feed. Inspected sample rows without saving the export. Switched the pipeline to stream this export, parse its `||` multi-value fields and language codes such as `English[eng]`, and keep the 100,000-book gate. The next cloud run will establish its actual complete count.
+13. The first direct-export cloud run [#3](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43652633320) stopped while reading the CSV with `ValueError: I/O operation on closed file`; it uploaded nothing. The cause was wrapping the HTTP response's raw stream in a text reader, which could close at the response boundary before the CSV reader completed. Switched to the response's line iterator and restored line endings so quoted descriptions spanning several lines remain valid CSV. Added a regression test for that case.
 
 ## Important decisions
 
@@ -45,5 +46,6 @@ Local verification before branch publication:
 - The initial CSV publication [#1](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43650910280) completed but did not meet the full-collection objective; it triggered the OAI source correction above.
 - OAI branch check [#4](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43651615611) passed. The OAI publication [#2](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43651699801) failed the count gate as expected, so it made no Hugging Face commit.
 - The direct export smoke check parsed one live book in memory and confirmed its title, ID, author list, `eng` language code, and record URL. No export file was saved locally.
+- After the HTTP reader correction, `ruff check .` passed and `python -m pytest -q` passed with 10 tests, including the multiline HTTP CSV regression case.
 
-The GitHub Actions checks and full metadata publish must also be inspected before claiming the shared dataset was updated. Results and links are added below after those runs.
+The corrected GitHub Actions checks and full metadata publish must also be inspected before claiming the shared dataset was updated. Results and links are added below after those runs.

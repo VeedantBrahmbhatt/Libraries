@@ -1,9 +1,7 @@
 """Stream DOAB's full repository export without saving the raw CSV."""
 
 import csv
-import io
-from collections.abc import Iterator
-from typing import TextIO
+from collections.abc import Iterable, Iterator
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -23,7 +21,13 @@ REQUIRED_COLUMNS = frozenset(
 )
 
 
-def parse_csv(stream: TextIO) -> Iterator[dict[str, str | None]]:
+def restore_newlines(lines: Iterable[str]) -> Iterator[str]:
+    """Restore line endings removed by the HTTP iterator for quoted CSV fields."""
+    for line in lines:
+        yield f"{line}\n"
+
+
+def parse_csv(stream: Iterable[str]) -> Iterator[dict[str, str | None]]:
     """Read quoted multiline CSV records after checking essential column names."""
     reader = csv.DictReader(stream)
     missing = REQUIRED_COLUMNS - set(reader.fieldnames or [])
@@ -39,6 +43,5 @@ def fetch_rows(url: str = DOAB_EXPORT_URL) -> Iterator[dict[str, str | None]]:
         session.mount("https://", HTTPAdapter(max_retries=retry))
         with session.get(url, stream=True, timeout=(10, 90)) as response:
             response.raise_for_status()
-            response.raw.decode_content = True
-            with io.TextIOWrapper(response.raw, encoding="utf-8-sig", newline="") as stream:
-                yield from parse_csv(stream)
+            response.encoding = "utf-8-sig"
+            yield from parse_csv(restore_newlines(response.iter_lines(decode_unicode=True)))
