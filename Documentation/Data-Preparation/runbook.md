@@ -9,7 +9,7 @@
 
 The `.venv` directory is ignored by Git. No Hugging Face token is needed to inspect the public dataset or run tests.
 
-## Publish a fresh complete snapshot
+## Publish a fresh export snapshot
 
 1. Confirm the GitHub repository has an Actions **repository secret** named `HF_TOKEN`. Its fine-grained Hugging Face token must have read and write contents permission for `Tox1/LibrariesBookData`.
 2. Open **Actions → Prepare and publish DOAB metadata → Run workflow** on the main branch. The workflow also runs when data-preparation code, its dependencies, or the publication workflow changes on `main`; unrelated documentation edits do not start a full refresh.
