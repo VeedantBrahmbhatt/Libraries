@@ -4,6 +4,8 @@
 
 Build a repeatable, free process that streams DOAB's direct full repository CSV export, keeps book records, and publishes a compact, model-neutral catalog to `Tox1/LibrariesBookData`. DOAB selects no search candidates for the eventual application. The workflow runs on a temporary GitHub Actions runner; actual DOAB records are not stored in this Git repository or on a team member's laptop.
 
+The 2026-11-14 export contained 91,667 book records, while DOAB's live site advertised over 111,000. This pipeline covers the available export snapshot and does not assert that every live-site title is present.
+
 ## Data flow
 
 1. Stream the official DOAB full repository export over HTTPS. Validate essential column names before processing records.

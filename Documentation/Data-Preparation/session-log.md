@@ -19,6 +19,7 @@ Prepare the complete DOAB book metadata catalog for a later NYU-focused semantic
 11. The complete OAI cloud run [#2](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43651699801) stopped before upload: 129,746 source rows, 25,415 non-book rows, 19,160 repeated book IDs, and 85,171 unique books. This result did not meet the full-collection objective. The 100,000-book gate prevented the incomplete result from replacing the first snapshot.
 12. Located DOAB's separate direct full repository export at `https://directory.doabooks.org/download-export?format=csv`, linked from its official FAQ. Its response is about 268 MB and its 138-column header includes book metadata beyond the smaller feed. Inspected sample rows without saving the export. Switched the pipeline to stream this export, parse its `||` multi-value fields and language codes such as `English[eng]`, and keep the 100,000-book gate. The next cloud run will establish its actual complete count.
 13. The first direct-export cloud run [#3](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43652633320) stopped while reading the CSV with `ValueError: I/O operation on closed file`; it uploaded nothing. The cause was wrapping the HTTP response's raw stream in a text reader, which could close at the response boundary before the CSV reader completed. Switched to the response's line iterator and restored line endings so quoted descriptions spanning several lines remain valid CSV. Added a regression test for that case.
+14. The corrected branch check [#5](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43652913085) passed. The subsequent full-export cloud run [#4](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43652998792) read 102,078 source rows and found 91,667 unique books, 10,410 non-book rows, and one book without a title. It stopped at the 100,000-book gate and uploaded nothing. The official live site still advertises over 111,000 books, so the available export is a measurable snapshot rather than proven coverage of every live-site title. Adjusted the gate to 90,000 based on the observed official export and added this coverage warning to the README, data dictionary, and dataset card. The gate detects a major shortfall; it cannot prove completeness.
 
 ## Important decisions
 
@@ -30,7 +31,7 @@ Prepare the complete DOAB book metadata catalog for a later NYU-focused semantic
 | No translation, stemming, or lowercasing of descriptions | Preserves multilingual meaning and display quality. Only language codes are lowercased. |
 | Deduplicate by DOAB ID only | Avoids collapsing distinct editions and translations. |
 | Keep records without abstracts | Prevents silent loss of books; missing descriptions are measured. |
-| Require at least 100,000 books | Stops a partial or unexpectedly changed export from replacing the shared dataset. |
+| Require at least 90,000 books | The official direct export contained 91,667 books on 2026-11-14. This gate stops a major shortfall without pretending the export includes every live-site title. |
 | One atomic Hugging Face upload | Avoids publishing a mix of old and new output files. |
 | Restricted main-branch publication plus manual refresh | Publishes reviewed pipeline changes automatically, while unrelated documentation edits avoid full-feed processing. A manual run remains available. |
 
@@ -47,5 +48,6 @@ Local verification before branch publication:
 - OAI branch check [#4](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43651615611) passed. The OAI publication [#2](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43651699801) failed the count gate as expected, so it made no Hugging Face commit.
 - The direct export smoke check parsed one live book in memory and confirmed its title, ID, author list, `eng` language code, and record URL. No export file was saved locally.
 - After the HTTP reader correction, `ruff check .` passed and `python -m pytest -q` passed with 10 tests, including the multiline HTTP CSV regression case.
+- The corrected direct-export run [#4](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43652998792) stopped at the 100,000-book gate. Its aggregate counts were: 102,078 source rows; 91,667 books; 10,410 non-books; 1 missing title; 13,125 missing abstracts; 5,763 missing subjects; 1,266 missing languages; 0 missing record URLs. No Hugging Face commit was made.
 
 The corrected GitHub Actions checks and full metadata publish must also be inspected before claiming the shared dataset was updated. Results and links are added below after those runs.

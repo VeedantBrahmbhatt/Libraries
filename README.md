@@ -4,7 +4,7 @@ Libraries is an NYU-focused prototype for discovering open-access books. This re
 
 ## Current phase
 
-The preparation workflow streams DOAB's [full repository metadata export](https://www.doabooks.org/en/researchers/full-faq), keeps book records, validates them, and publishes a compressed catalog to [Tox1/LibrariesBookData](https://huggingface.co/datasets/Tox1/LibrariesBookData). The DOAB metadata is CC0; the books have their own licenses. No raw DOAB dataset is committed here.
+The preparation workflow streams DOAB's [repository metadata export](https://www.doabooks.org/en/researchers/full-faq), keeps book records, validates them, and publishes a compressed catalog to [Tox1/LibrariesBookData](https://huggingface.co/datasets/Tox1/LibrariesBookData). The DOAB metadata is CC0; the books have their own licenses. No raw DOAB dataset is committed here.
 
 ## Repository guide
 
@@ -24,4 +24,4 @@ See [the data preparation runbook](Documentation/Data-Preparation/runbook.md) fo
 
 ## Project status
 
-Data preparation is being completed on `prepare-doab-data`. The README and session record are updated with each phase. Check the Hugging Face `manifest.json` for the exact currently published snapshot; the first trial used a smaller DOAB feed and is being superseded by the direct full repository export.
+Data preparation is being completed on `prepare-doab-data`. The README and session record are updated with each phase. Check the Hugging Face `manifest.json` for the exact currently published snapshot. The official direct export yielded 91,667 books on 2026-11-14, below DOAB's live-site claim of over 111,000 books. This project treats the export as a useful corpus snapshot and records the coverage gap; it does not claim every live-site title is included.

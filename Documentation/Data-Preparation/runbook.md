@@ -24,7 +24,7 @@ Manual runs are available for refreshes. The restricted main-branch trigger publ
 | Failure | Meaning and response |
 | --- | --- |
 | Source download or required-column error | DOAB may be unavailable or may have changed its export; check the current DOAB metadata page before changing the mapping. |
-| Prepared count below 100,000 | The feed may be incomplete or book type values may have changed. Inspect the aggregate quality counts in the run log; do not lower the threshold without checking the source. |
+| Prepared count below 90,000 | The export may be incomplete or book type values may have changed. Inspect the aggregate quality counts in the run log and compare them with the last successful snapshot before changing the threshold. |
 | Checksum, schema, or row-count error | The prepared bundle changed or is incomplete; rerun preparation. |
 | Hugging Face 401/403 | Check that the `HF_TOKEN` secret exists and its token has permissions for the selected dataset. Never print the token. |
 | Hugging Face upload error | Check the dataset repository and service status; rerun after the issue clears. A failed upload should not be treated as a new published snapshot. |

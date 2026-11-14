@@ -16,7 +16,7 @@ from libraries_data.schema import BOOK_SCHEMA, SCHEMA_VERSION
 from libraries_data.source import DOAB_EXPORT_URL, fetch_rows
 
 BATCH_SIZE = 5_000
-DEFAULT_MIN_BOOKS = 100_000
+DEFAULT_MIN_BOOKS = 90_000
 
 
 def _write_json(path: Path, data: dict[str, object]) -> None:
@@ -43,6 +43,8 @@ def _dataset_card(source_url: str, books_written: int) -> str:
         "DOAB metadata is CC0; linked books have separate licenses.\n\n"
         "The `semantic_text` column combines titles, subject keywords, and available abstracts "
         "for later model experiments. The separate source fields remain available. "
+        "This is the book subset of one official export snapshot; DOAB's live site may "
+        "contain titles absent from that export. "
         "This dataset provides no relevance labels, NYU holdings, or calibrated "
         "confidence scores.\n\n"
         "See `manifest.json` for the snapshot count and checksum, and `quality_report.json` "

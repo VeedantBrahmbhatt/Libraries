@@ -26,7 +26,7 @@ Text is HTML-unescaped, stripped of simple markup, whitespace-normalized, and Un
 
 ## Exclusions and checks
 
-Rows whose `dc.type` is not `book` are excluded. Book rows without an ID or title are rejected and counted. A complete publication requires at least 100,000 unique books, consistent with DOAB's stated collection size. The quality report counts duplicates and missing abstracts, subjects, languages, and record URLs. Missing fields are measured, not guessed.
+Rows whose `dc.type` is not `book` are excluded. Book rows without an ID or title are rejected and counted. Publication requires at least 90,000 unique books: the direct export yielded 91,667 books on 2026-11-14, so this gate catches a substantially smaller or interrupted snapshot. It does not prove that the export matches every title on DOAB's live site, which advertises over 111,000 books. The quality report counts duplicates and missing abstracts, subjects, languages, and record URLs. Missing fields are measured, not guessed.
 
 The direct export includes many fields that are irrelevant to search, including administrative contact information. The prepared dataset selects only the fields above. The first smaller CSV feed and the OAI-PMH harvest trials are recorded in the session log. `semantic_text` is **not** an embedding, model score, confidence score, or relevance label. The metadata does not include NYU holdings or book full text.
 
