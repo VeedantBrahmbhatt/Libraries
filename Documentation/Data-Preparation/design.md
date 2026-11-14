@@ -13,6 +13,8 @@ Build a repeatable, free process that reads the complete DOAB CSV metadata feed,
 5. Write a machine-readable manifest and quality report. Reject suspiciously small complete runs.
 6. Upload the dataset artifacts together in one Hugging Face commit, using a repository-scoped token from the GitHub Actions secret `HF_TOKEN`.
 
+The workflow runs when pipeline code, dependencies, or its own definition changes on `main`, and it can also be started manually. Documentation-only changes do not download the full feed.
+
 ## Boundaries
 
 - This phase prepares metadata, not book full text, embeddings, a retrieval index, relevance labels, confidence scores, a login system, or a UI.

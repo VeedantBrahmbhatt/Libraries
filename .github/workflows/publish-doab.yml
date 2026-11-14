@@ -2,6 +2,12 @@ name: Prepare and publish DOAB metadata
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'src/libraries_data/**'
+      - 'pyproject.toml'
+      - '.github/workflows/publish-doab.yml'
 
 permissions:
   contents: read

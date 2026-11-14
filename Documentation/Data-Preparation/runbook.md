@@ -12,12 +12,12 @@ The `.venv` directory is ignored by Git. No Hugging Face token is needed to insp
 ## Publish a fresh complete snapshot
 
 1. Confirm the GitHub repository has an Actions **repository secret** named `HF_TOKEN`. Its fine-grained Hugging Face token must have read and write contents permission for `Tox1/LibrariesBookData`.
-2. Open **Actions → Prepare and publish DOAB metadata → Run workflow** on the main branch.
+2. Open **Actions → Prepare and publish DOAB metadata → Run workflow** on the main branch. The workflow also runs when data-preparation code, its dependencies, or the publication workflow changes on `main`; unrelated documentation edits do not start a full refresh.
 3. Watch the preparation step. It reads the official DOAB CSV directly into the runner's memory, writes a compressed Parquet catalog in the runner's temporary directory, and checks the book count.
 4. If preparation passes, the publish step validates the checksum, row count, and schema, then commits the four output files to Hugging Face together.
 5. Confirm `manifest.json`, `quality_report.json`, `README.md`, and `data/books.parquet` are visible in the Hugging Face dataset. Compare the manifest count with the Actions log.
 
-The workflow is manual to avoid repeated full-feed processing. It does not commit raw DOAB data or upload it as a GitHub artifact. Its temporary output is removed after the run, and the runner is ephemeral.
+Manual runs are available for refreshes. The restricted main-branch trigger publishes after reviewed pipeline changes without processing the full feed for unrelated edits. The workflow does not commit raw DOAB data or upload it as a GitHub artifact. Its temporary output is removed after the run, and the runner is ephemeral.
 
 ## Interpret a failure
 

@@ -12,7 +12,7 @@ Prepare the complete DOAB book metadata catalog for a later NYU-focused semantic
 4. Created a project-only Python environment in ignored `.venv/`. The repository contains code and synthetic tests, not a DOAB dump.
 5. Wrote tests for multilingual normalization, book selection, edition identity, CSV header validation, catalog output, small-feed rejection, and bundle integrity before implementing those behaviors.
 6. Implemented streaming CSV reading, model-neutral normalization, bounded-batch Parquet writing, quality reporting, and checked Hugging Face publishing.
-7. Added a test workflow for each push and a manual full-feed publish workflow. The publish workflow reads `HF_TOKEN` only during the upload step and removes temporary output afterward.
+7. Added a test workflow for each push and a full-feed publish workflow with manual dispatch and a restricted main-branch trigger. The publish workflow reads `HF_TOKEN` only during the upload step and removes temporary output afterward.
 8. Added the root README, data dictionary, runbook, model and evaluation handoff notes, and project handover.
 
 ## Important decisions
@@ -27,7 +27,7 @@ Prepare the complete DOAB book metadata catalog for a later NYU-focused semantic
 | Keep records without abstracts | Prevents silent loss of books; missing descriptions are measured. |
 | Require at least 50,000 books | Stops a truncated or unexpectedly changed full feed from replacing the shared dataset. |
 | One atomic Hugging Face upload | Avoids publishing a mix of old and new output files. |
-| Manual publication | Avoids unplanned full-feed work and lets the team review changes first. |
+| Restricted main-branch publication plus manual refresh | Publishes reviewed pipeline changes automatically, while unrelated documentation edits avoid full-feed processing. A manual run remains available. |
 
 ## Verification and publication record
 
@@ -36,5 +36,6 @@ Local verification before branch publication:
 - `ruff check .`: passed.
 - `python -m pytest -q`: 8 passed.
 - Live-source smoke check: the DOAB CSV could be streamed, and its first record had an ID and `dc.type=book`. No actual DOAB row was saved locally.
+- First branch push: GitHub Actions check run [#1](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43650602861) completed successfully.
 
 The GitHub Actions checks and full metadata publish must also be inspected before claiming the shared dataset was updated. Results and links are added below after those runs.

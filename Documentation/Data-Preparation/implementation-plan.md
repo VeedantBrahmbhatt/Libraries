@@ -11,4 +11,4 @@ This plan implements the approved data-preparation phase on branch `prepare-doab
 | Publish a checked result | `src/libraries_data/publish.py`, tests | Local artifact checks; no network publish in tests |
 | Automate and document | `.github/workflows/*.yml`, README, Documentation | Lint, tests, workflow run, remote artifact inspection |
 
-The workflow is manually triggered to avoid unplanned repeated full downloads. It runs quality checks before any Hugging Face write. Publish is a separate command so teammates can test preparation without credentials.
+The workflow can be started manually, or by changes to data-preparation code, dependencies, or the workflow on `main`. Documentation-only changes do not download the full feed. It runs quality checks before any Hugging Face write. Publish is a separate command so teammates can test preparation without credentials.
