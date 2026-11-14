@@ -7,25 +7,27 @@ Prepare the complete DOAB book metadata catalog for a later NYU-focused semantic
 ## Steps and reasons
 
 1. Inspected the initially empty local and remote Git repositories. Initialized `main` with an empty commit so feature work could use the requested `prepare-doab-data` branch.
-2. Checked DOAB's official metadata page and inspected the live CSV header and one record without saving the feed. This confirmed the source names used in the mapping, including book type, title, author, subjects, abstract, language, identifiers, links, and license.
+2. Checked DOAB's official metadata page and inspected the live CSV header and one record without saving the feed. This confirmed useful field names but did not establish that the CSV covered every DOAB record.
 3. Wrote the design and implementation plan before package code. This records the agreed source, boundaries, validation, and publishing approach.
 4. Created a project-only Python environment in ignored `.venv/`. The repository contains code and synthetic tests, not a DOAB dump.
 5. Wrote tests for multilingual normalization, book selection, edition identity, CSV header validation, catalog output, small-feed rejection, and bundle integrity before implementing those behaviors.
-6. Implemented streaming CSV reading, model-neutral normalization, bounded-batch Parquet writing, quality reporting, and checked Hugging Face publishing.
+6. Implemented streaming source reading, model-neutral normalization, bounded-batch Parquet writing, quality reporting, and checked Hugging Face publishing.
 7. Added a test workflow for each push and a full-feed publish workflow with manual dispatch and a restricted main-branch trigger. The publish workflow reads `HF_TOKEN` only during the upload step and removes temporary output afterward.
 8. Added the root README, data dictionary, runbook, model and evaluation handoff notes, and project handover.
+9. The first full cloud run [#1](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43650910280) succeeded technically and published [Hugging Face commit `99d5801`](https://huggingface.co/datasets/Tox1/LibrariesBookData/commit/99d5801ce8a712d297baf6b18667e5cdd26699f9): 55,606 books from 60,859 CSV rows, with 8,481 missing abstracts. This was smaller than DOAB's stated collection of over 111,000 books, so it is an **incomplete first trial**, not the final catalog.
+10. Queried DOAB's OAI-PMH `ListIdentifiers` and `ListRecords` endpoints. The full feed reported about 129,000 records, including chapters and deleted records. Replaced the CSV source with paginated `oai_dc` harvesting, added pagination and completeness tests, and raised the book-count gate to 100,000. The OAI source keeps the fields needed for the agreed model-neutral catalog while covering the directory.
 
 ## Important decisions
 
 | Decision | Reason |
 | --- | --- |
-| Official DOAB CSV feed | Provides the full metadata export without delegating search or candidate selection. |
-| Stream instead of download a raw file | Keeps raw DOAB files off laptops and out of Git; bounds processing memory. |
+| Full DOAB OAI-PMH `oai_dc` feed | The CSV trial contained far fewer books than the directory's stated coverage. OAI provides paginated access to the full record set without delegating search or candidate selection. |
+| Stream pages instead of download a raw file | Keeps raw DOAB files off laptops and out of Git; bounds processing memory. |
 | Preserve separate source fields and add `semantic_text` | Supports keyword, hybrid, and multilingual model experiments without losing original field boundaries. |
 | No translation, stemming, or lowercasing of descriptions | Preserves multilingual meaning and display quality. Only language codes are lowercased. |
 | Deduplicate by DOAB ID only | Avoids collapsing distinct editions and translations. |
 | Keep records without abstracts | Prevents silent loss of books; missing descriptions are measured. |
-| Require at least 50,000 books | Stops a truncated or unexpectedly changed full feed from replacing the shared dataset. |
+| Require at least 100,000 books | Stops a partial or unexpectedly changed OAI harvest from replacing the shared dataset. |
 | One atomic Hugging Face upload | Avoids publishing a mix of old and new output files. |
 | Restricted main-branch publication plus manual refresh | Publishes reviewed pipeline changes automatically, while unrelated documentation edits avoid full-feed processing. A manual run remains available. |
 
@@ -37,5 +39,7 @@ Local verification before branch publication:
 - `python -m pytest -q`: 8 passed.
 - Live-source smoke check: the DOAB CSV could be streamed, and its first record had an ID and `dc.type=book`. No actual DOAB row was saved locally.
 - First branch push: GitHub Actions check run [#1](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43650602861) completed successfully.
+- Second branch check [#2](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43650780699) and main-branch check [#3](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43650910256) completed successfully for the initial CSV pipeline.
+- The initial CSV publication [#1](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43650910280) completed but did not meet the full-collection objective; it triggered the OAI source correction above.
 
 The GitHub Actions checks and full metadata publish must also be inspected before claiming the shared dataset was updated. Results and links are added below after those runs.

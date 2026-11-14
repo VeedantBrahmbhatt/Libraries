@@ -18,11 +18,12 @@ def clean_text(value: str | None) -> str:
     return _SPACE.sub(" ", unicodedata.normalize("NFC", without_tags)).strip()
 
 
-def split_values(value: str | None) -> list[str]:
-    """Split DOAB's semicolon-separated metadata and retain source order."""
+def split_values(value: str | list[str] | None) -> list[str]:
+    """Keep OAI values separate and also support older semicolon-separated values."""
     values: list[str] = []
     seen: set[str] = set()
-    for raw_value in (value or "").split(";"):
+    raw_values = value if isinstance(value, list) else (value or "").split(";")
+    for raw_value in raw_values:
         item = clean_text(raw_value)
         if item and item.casefold() not in seen:
             values.append(item)
@@ -30,9 +31,10 @@ def split_values(value: str | None) -> list[str]:
     return values
 
 
-def _first_value(row: Mapping[str, str | None], *keys: str) -> str:
+def _first_value(row: Mapping[str, str | list[str] | None], *keys: str) -> str:
     for key in keys:
-        value = clean_text(row.get(key))
+        raw_value = row.get(key)
+        value = clean_text(raw_value if isinstance(raw_value, str) else None)
         if value:
             return value
     return ""
@@ -43,7 +45,7 @@ def _http_url(value: str | None) -> str:
     return url if url.startswith(("https://", "http://")) else ""
 
 
-def normalize_book(row: Mapping[str, str | None]) -> dict[str, object] | None:
+def normalize_book(row: Mapping[str, str | list[str] | None]) -> dict[str, object] | None:
     """Return a model-neutral book record, or None for non-book rows.
 
     Missing IDs and titles are errors so the pipeline can count them separately.

@@ -2,7 +2,7 @@
 
 ## Current scope
 
-The first session prepares DOAB book metadata. Code is in `src/libraries_data`; test fixtures are synthetic. The shared output belongs in `Tox1/LibrariesBookData`, and `HF_TOKEN` is stored as a GitHub Actions repository secret. The README is the current entry point and must be updated with every later project phase.
+The first session prepares DOAB book metadata from its full OAI-PMH feed. Code is in `src/libraries_data`; test fixtures are synthetic. The shared output belongs in `Tox1/LibrariesBookData`, and `HF_TOKEN` is stored as a GitHub Actions repository secret. The README is the current entry point and must be updated with every later project phase.
 
 ## How to continue
 
