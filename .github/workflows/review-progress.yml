@@ -1,0 +1,37 @@
+name: Check human review progress
+
+on:
+  push:
+    paths:
+      - 'evaluation/review/**'
+      - 'evaluation/queries/**'
+      - 'src/libraries_evaluation/review.py'
+      - 'src/libraries_evaluation/schema.py'
+      - '.github/workflows/review-progress.yml'
+  pull_request:
+    paths:
+      - 'evaluation/review/**'
+      - 'evaluation/queries/**'
+      - 'src/libraries_evaluation/review.py'
+      - 'src/libraries_evaluation/schema.py'
+      - '.github/workflows/review-progress.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  progress:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Validate every review sheet and count grades
+        run: |
+          PYTHONPATH=src python -m libraries_evaluation.review progress \
+            --queries evaluation/queries/pilot.jsonl \
+            --review-dir evaluation/review/pilot \
+            --summary "$RUNNER_TEMP/review-progress.md"
+          cat "$RUNNER_TEMP/review-progress.md" >> "$GITHUB_STEP_SUMMARY"

@@ -13,32 +13,11 @@ from huggingface_hub import snapshot_download
 
 from libraries_evaluation.config import INDEX_DATASET_REPO, INDEX_PATH, INDEX_REVISION, MODES
 from libraries_evaluation.queries import load_queries
+from libraries_evaluation.schema import REVIEW_FIELDS, RUN_FIELDS, TIMING_FIELDS
 from libraries_search.model import load_model
 from libraries_search.publish import validate_index_bundle
 from libraries_search.search import SearchEngine
 from libraries_search.source import sha256_file
-
-RUN_FIELDS = ("query_id", "mode", "rank", "book_id", "rank_score", "semantic_similarity")
-TIMING_FIELDS = ("query_id", "mode", "latency_ms", "result_count")
-REVIEW_FIELDS = (
-    "query_id",
-    "query_text",
-    "query_language",
-    "query_intent",
-    "query_split",
-    "book_id",
-    "title",
-    "authors",
-    "subjects",
-    "book_languages",
-    "publication_year",
-    "book_url",
-    "abstract_excerpt",
-    "keyword_rank",
-    "semantic_rank",
-    "hybrid_rank",
-    "relevance",
-)
 
 
 def _write_csv(path: Path, fields: tuple[str, ...], rows: list[dict[str, Any]]) -> None:

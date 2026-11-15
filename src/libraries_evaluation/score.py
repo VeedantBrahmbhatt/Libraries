@@ -9,9 +9,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-from libraries_evaluation.collect import REVIEW_FIELDS, RUN_FIELDS, TIMING_FIELDS
 from libraries_evaluation.config import MODES
 from libraries_evaluation.queries import EvaluationQuery, load_queries
+from libraries_evaluation.schema import REVIEW_FIELDS, RUN_FIELDS, TIMING_FIELDS
 from libraries_search.source import sha256_file
 
 

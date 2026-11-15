@@ -6,7 +6,7 @@ on:
     branches: [main]
     paths:
       - 'src/libraries_evaluation/**'
-      - 'evaluation/**'
+      - 'evaluation/queries/**'
       - '.github/workflows/evaluate-search.yml'
 
 permissions:
@@ -34,12 +34,20 @@ jobs:
         run: python -m pip install -e '.[search]'
       - name: Collect unjudged pilot results from pinned index
         run: libraries-collect-evaluation --queries evaluation/queries/pilot.jsonl --index-dir "$RUNNER_TEMP/evaluation-index" --output-dir "$RUNNER_TEMP/evaluation-output" --top-k 10
-      - name: Score only if complete human judgments are committed
+      - name: Check review sheets and assemble complete judgments
         run: |
-          if [ -f evaluation/judgments/pilot.csv ]; then
-            libraries-score-evaluation --queries evaluation/queries/pilot.jsonl --run-dir "$RUNNER_TEMP/evaluation-output" --judgments evaluation/judgments/pilot.csv --output "$RUNNER_TEMP/evaluation-output/metrics.json"
+          python -m libraries_evaluation.review assemble \
+            --queries evaluation/queries/pilot.jsonl \
+            --review-dir evaluation/review/pilot \
+            --run-dir "$RUNNER_TEMP/evaluation-output" \
+            --output "$RUNNER_TEMP/evaluation-output/judgments.csv" \
+            --summary "$RUNNER_TEMP/evaluation-output/progress.md"
+      - name: Score only complete human judgments
+        run: |
+          if [ -f "$RUNNER_TEMP/evaluation-output/judgments.csv" ]; then
+            libraries-score-evaluation --queries evaluation/queries/pilot.jsonl --run-dir "$RUNNER_TEMP/evaluation-output" --judgments "$RUNNER_TEMP/evaluation-output/judgments.csv" --output "$RUNNER_TEMP/evaluation-output/metrics.json"
           else
-            echo 'No human judgments committed; relevance metrics intentionally skipped.'
+            echo 'Human review is incomplete; relevance metrics intentionally skipped.'
           fi
       - name: Show pilot examples in GitHub
         if: always()
@@ -47,6 +55,16 @@ jobs:
           if [ -f "$RUNNER_TEMP/evaluation-output/summary.md" ]; then
             cat "$RUNNER_TEMP/evaluation-output/summary.md" >> "$GITHUB_STEP_SUMMARY"
             sed -n '1,20p' "$RUNNER_TEMP/evaluation-output/summary.md"
+          fi
+          if [ -f "$RUNNER_TEMP/evaluation-output/progress.md" ]; then
+            cat "$RUNNER_TEMP/evaluation-output/progress.md" >> "$GITHUB_STEP_SUMMARY"
+            cat "$RUNNER_TEMP/evaluation-output/progress.md"
+          fi
+          if [ -f "$RUNNER_TEMP/evaluation-output/metrics.json" ]; then
+            echo '## Scored metrics' >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat "$RUNNER_TEMP/evaluation-output/metrics.json" >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
           fi
       - name: Upload small review files
         if: always()
