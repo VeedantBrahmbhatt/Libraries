@@ -14,6 +14,7 @@ The user chose GitHub Actions for cloud processing and rejected the proposed gra
 6. Added bounded-batch Parquet reading, SQLite FTS5, pinned E5 inference, vector validation, a manifest, bundle validation, query ranking, and exact-path Hugging Face publishing.
 7. Added a GitHub Actions build with CPU-only PyTorch, a smoke search, temporary runner storage, and secret exposure only in the publish step. It shares a publication concurrency group with the metadata workflow to avoid simultaneous writes to the dataset repository.
 8. Added ignored search artifact extensions and a guard that rejects the full-data build outside GitHub Actions. This reduces the chance of a real index or source file being created or committed on a laptop by accident.
+9. The initial branch push produced a GitHub Actions workflow-definition failure before any search job started. The job-level `env` expression used `runner.temp`, which is not available when GitHub evaluates that section. Moved the temporary `HF_HOME` assignment into a setup step using `GITHUB_ENV`, where the runner's `RUNNER_TEMP` variable is available. The ordinary code check remained separate.
 
 ## File map
 
