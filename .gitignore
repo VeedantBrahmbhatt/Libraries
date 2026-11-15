@@ -8,6 +8,10 @@ dist/
 build/
 data/
 *.parquet
+*.npy
+*.sqlite
+.cache/
+hf-cache/
 .env
 .env.*
 !.env.example

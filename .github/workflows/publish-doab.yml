@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: publish-doab-metadata
+  group: publish-hf-libraries-book-data
   cancel-in-progress: false
 
 jobs:

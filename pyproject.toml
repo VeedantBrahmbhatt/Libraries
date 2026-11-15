@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "libraries-data"
 version = "0.1.0"
-description = "Reproducible DOAB metadata preparation for the Libraries prototype"
+description = "Reproducible DOAB metadata preparation and owned search for Libraries"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -15,11 +15,15 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8,<10", "ruff>=0.8,<1"]
+dev = ["numpy>=1.26,<3", "pytest>=8,<10", "ruff>=0.8,<1"]
+search = ["numpy>=1.26,<3", "sentence-transformers==6.3.0"]
 
 [project.scripts]
 libraries-prepare = "libraries_data.prepare:main"
 libraries-publish = "libraries_data.publish:main"
+libraries-build-index = "libraries_search.build:main"
+libraries-publish-index = "libraries_search.publish:main"
+libraries-search = "libraries_search.search:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
