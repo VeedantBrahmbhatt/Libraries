@@ -161,3 +161,19 @@ def test_assembly_rejects_changed_cloud_candidate_pool(tmp_path):
 
     with pytest.raises(ValueError, match="candidate pool"):
         assemble_judgments(queries_path, review_dir, run_dir, tmp_path / "judgments.csv")
+
+
+def test_assembly_checks_cloud_pool_before_humans_finish_grading(tmp_path):
+    queries_path, run_dir = _source(tmp_path)
+    review_dir = tmp_path / "sheets"
+    initialize_review(queries_path, run_dir, review_dir)
+    rows = _rows(run_dir / "review.csv")
+    rows[0]["book_id"] = "new-book"
+    _write_csv(run_dir / "review.csv", REVIEW_FIELDS, rows)
+    manifest_path = run_dir / "manifest.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["review_sha256"] = hashlib.sha256((run_dir / "review.csv").read_bytes()).hexdigest()
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    with pytest.raises(ValueError, match="candidate pool"):
+        assemble_judgments(queries_path, review_dir, run_dir, tmp_path / "judgments.csv")

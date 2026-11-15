@@ -12,7 +12,7 @@ Three approaches were considered: one large CSV, one file per question, and a cu
 
 The manifest pins the original pilot run and query checksum, expected pair count, and a digest of all question–book IDs. A small review command checks duplicate, missing, extra, or invalid rows and reports how many 0/1/2 grades are complete. Partial grading remains a valid work-in-progress state, never a measured search score.
 
-When all grades are complete, the same command overlays them onto a freshly collected cloud `review.csv` and writes a temporary full judgment file. The existing scorer checks every row and computes metrics. The temporary file is discarded with the runner. If the new candidate pool differs from the pinned pilot, scoring stops and the team must start a new review version.
+Every full cloud run compares its freshly collected `review.csv` with the frozen review pool, even while grading is incomplete. When all grades are complete, the same command overlays them and writes a temporary full judgment file. The existing scorer checks every row and computes metrics. The temporary file is discarded with the runner. If the new candidate pool differs from the pinned pilot, the job stops and the team must start a new review version.
 
 ## Cloud behavior and limits
 

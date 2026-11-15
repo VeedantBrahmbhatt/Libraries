@@ -23,7 +23,7 @@ Leave `relevance` blank when unsure and resolve it with another reviewer; a blan
 
 In the first pilot, 37 of 233 rows have no abstract preview. Open their source links and judge from the available book description or contents; leave the grade blank if the evidence is insufficient.
 
-Commit each question file on a purpose-named branch and merge it into `main` after **Check human review progress** passes. That lightweight job counts grades without downloading the index. When it reaches 233 of 233, manually start **Collect and score owned search evaluation** on `main`. The job recollects the pinned candidates, checks that they match the review sheets, assembles a temporary judgment file, and writes `metrics.json` only after all grades are valid. If the question file, index, or ranking code changes the candidate pool, start a new review version. A stopped score step means inputs changed or labels are invalid, not that a search mode scored zero.
+Commit each question file on a purpose-named branch and merge it into `main` after **Check human review progress** passes. That lightweight job counts grades without downloading the index. When it reaches 233 of 233, manually start **Collect and score owned search evaluation** on `main`. The job recollects the pinned candidates and checks that they match the review sheets even if grades are still blank. It assembles a temporary judgment file and writes `metrics.json` only after all grades are valid. If the question file, index, or ranking code changes the candidate pool, start a new review version. A stopped score step means inputs changed or labels are invalid, not that a search mode scored zero.
 
 ## Read the report
 

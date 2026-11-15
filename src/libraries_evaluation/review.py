@@ -223,8 +223,6 @@ def assemble_judgments(
     )
     output_path.unlink(missing_ok=True)
     manifest, queries, sheets = _read_sheets(queries_path, review_dir)
-    if any(not row["relevance"] for row in sheets.values()):
-        return False
     source, source_rows = _read_source_run(queries_path, run_dir, queries)
     if source["index_revision"] != manifest["index_revision"]:
         raise ValueError("Fresh cloud run uses a different index revision")
@@ -233,6 +231,8 @@ def assemble_judgments(
         raise ValueError("Fresh cloud candidate pool changed")
     if _metadata_sha256(fresh) != manifest["metadata_sha256"]:
         raise ValueError("Fresh cloud candidate pool metadata changed")
+    if any(not row["relevance"] for row in sheets.values()):
+        return False
     judged = []
     for row in source_rows:
         judged.append({**row, "relevance": sheets[(row["query_id"], row["book_id"])]["relevance"]})
