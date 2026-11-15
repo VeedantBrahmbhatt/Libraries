@@ -16,9 +16,9 @@ The recommended approach is a reproducible GitHub Actions job. It downloads the 
 | Candidate run | CSV of top 10 results per question for keyword, semantic, and hybrid, with ranks and warm query times |
 | Review sheet | One CSV row per distinct question–book pair across the three modes, with metadata, a short abstract excerpt, source link, and an empty `relevance` cell |
 | Human judgments | The same review rows with `relevance` filled as 0 (not useful), 1 (partly useful), or 2 (clearly useful) |
-| Scored report | JSON with sample counts, Success@5, pooled nDCG@10, known-title top-one rate, p95 warm time, language breakdown, and hybrid versus keyword difference |
+| Scored report | JSON with sample counts, Success@5, pooled nDCG@10, known-title top-one rate, p95 warm time, language and split breakdowns, abstract-availability counts, and hybrid versus keyword difference |
 
-The cloud run records the index manifest checksum and question-file checksum. Candidate files are GitHub Actions artifacts with limited retention; the source questions, later completed judgments, code, and documentation belong in Git. The job summary shows compact top-result examples in the browser.
+The cloud run records the index manifest checksum and question-file checksum. Candidate files are GitHub Actions artifacts with limited retention; the source questions, later completed judgments, code, and documentation belong in Git. The job summary shows top-result examples and the full review pool in the browser.
 
 ## Measurement rules
 

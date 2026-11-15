@@ -37,14 +37,14 @@
 ## Task 2: Candidate collection
 
 1. Write a failing synthetic test using the existing fake book encoder and index builder; assert that one query produces three top-10 lists and one row per distinct candidate in the review sheet.
-2. Implement `collect_results(engine: SearchEngine, queries: list[EvaluationQuery], output_dir: Path, *, top_k: int = 10) -> dict` with warm timing, deterministic CSV order, and index/question provenance.
+2. Implement `collect_results(engine: SearchEngine, queries_path: Path, output_dir: Path, *, index_revision: str, top_k: int = 10) -> dict` with warm timing, deterministic CSV order, and index/question provenance.
 3. Add cloud-only CLI guards and a pinned `snapshot_download` call that fetches `search/v1/*` into runner temporary storage.
 4. Run focused tests and lint, then commit the collector.
 
 ## Task 3: Judged scoring
 
 1. Write failing tests for complete 0/1/2 labels, a missing pooled label, invalid grade, and a known-title mismatch.
-2. Implement `score_results(queries_path: Path, runs_path: Path, judgments_path: Path) -> dict` with Success@5, pooled nDCG@10, known-title top-one, p95 warm time, split/language sample counts, and hybrid improvement.
+2. Implement `score_results(queries_path: Path, run_dir: Path, judgments_path: Path) -> dict` with Success@5, pooled nDCG@10, known-title top-one, p95 warm time, split/language sample counts, and hybrid improvement.
 3. Require every pooled query–book pair to be judged and reject duplicate or changed run rows.
 4. Run focused tests and lint, then commit the scorer.
 

@@ -159,7 +159,10 @@ def test_collect_results_pools_three_modes_without_fake_labels(tmp_path):
     assert manifest["candidate_count"] == 2
     assert manifest["index_books_indexed"] == 2
     assert manifest["index_revision"] == "synthetic-index"
-    assert "Unjudged pilot" in (tmp_path / "evaluation" / "summary.md").read_text()
+    summary = (tmp_path / "evaluation" / "summary.md").read_text()
+    assert "Unjudged pilot" in summary
+    assert "Review pool" in summary
+    assert "Coastal flood policy" in summary
 
 
 def test_collect_results_rejects_invalid_top_k_before_output(tmp_path):

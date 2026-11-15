@@ -164,6 +164,25 @@ def collect_results(
         f"{_table_cell(title)} |"
         for query_id, language, text, title in summary_rows
     )
+    summary.extend(
+        [
+            "",
+            "## Review pool",
+            "",
+            "Use the book ID when recording a 0, 1, or 2 grade. Blank grades remain unjudged.",
+            "",
+            "| Query ID | Book ID | Title | K / S / H rank | Abstract preview | Source |",
+            "| --- | --- | --- | --- | --- | --- |",
+        ]
+    )
+    for row in reviews:
+        rank_text = " / ".join(str(row[f"{mode}_rank"] or "–") for mode in MODES)
+        source = f"[Open]({row['book_url']})" if row["book_url"].startswith("https://") else ""
+        summary.append(
+            f"| {_table_cell(row['query_id'])} | {_table_cell(row['book_id'])} | "
+            f"{_table_cell(row['title'])} | {rank_text} | "
+            f"{_table_cell(row['abstract_excerpt'])} | {source} |"
+        )
     (output_dir / "summary.md").write_text("\n".join(summary) + "\n", encoding="utf-8")
     manifest: dict[str, Any] = {
         "schema_version": 1,
