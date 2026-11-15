@@ -31,6 +31,15 @@ Commit each question file on a purpose-named branch and merge it into `main` aft
 
 `rank_score` and semantic similarity are relative signals, not confidence percentages. A book missing from the 91,667-book export is a corpus coverage issue; it cannot be fixed by reranking the returned books. Expand to 100–150 anonymous natural questions and complete human judgments before assessing the provisional project targets.
 
+## Repeat the answer-derived diagnostic
+
+1. Read the [diagnostic design](answer-derived-design.md) and [results](answer-derived-results.md). The 24 questions were written from known books and are a development check, not a student sample.
+2. Open **Actions → Diagnose answer-derived book retrieval → Run workflow** on `main`. It runs the pinned index on temporary GitHub storage and uploads the small `answer-derived-diagnostic` artifact for 30 days.
+3. Read the run summary for top-level target recovery and the artifact's `target-metrics.json` for every source-book rank. A blank rank means that book was outside the top ten for that mode; another returned book may still answer the question.
+4. If the question file, source-book mapping, index revision, or ranking logic changes, record the new revision and rerun all modes. Keep the old metrics for comparison instead of overwriting a result without its provenance.
+
+The separate `evaluation/ai-review/pilot-grades.csv` gives the assistant's 233 metadata-based grades. `evaluation/ai-review/pilot-metrics.json` holds their scored pilot results. These files must never be copied into the human review folder or called human judgments. The saved [book-recovery metrics](../../evaluation/diagnostics/answer-derived-metrics.json) belong to the [2026-11-15 cloud run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43775201104); its manifest records the exact question and index revisions. The full catalog and index stay off team laptops.
+
 ## Change or rerun
 
 Edit `evaluation/queries/pilot.jsonl` only when intentionally changing the pilot. Keep stable IDs for unchanged questions. Run local synthetic tests with `python -m pytest -q` and `ruff check .`; the real-index command refuses to run outside GitHub Actions. Read [the design](design.md) and [review handoff design](review-design.md) before altering metric definitions or grading files, and record each change in [the session log](session-log.md) and root README.
