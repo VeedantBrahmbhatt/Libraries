@@ -3,7 +3,7 @@
 | Folder or file | What it records |
 | --- | --- |
 | [Data Preparation](Data-Preparation/design.md) | Architecture, implementation plan, field decisions, runbook, and this session's record |
-| [Search](Search/design.md) | Architecture, implementation plan, runbook, and search-index session record |
+| [Search](Search/design.md) | Architecture, implementation plan, parallel-build recovery, runbook, and search-index session record |
 | [Model](Model/README.md) | Chosen multilingual model, input format, version, and limits |
 | [Evaluation](Evaluation/README.md) | Search-quality tests still required before relevance claims |
 | [Handover](HANDOVER.md) | Current status and next actions for the team |

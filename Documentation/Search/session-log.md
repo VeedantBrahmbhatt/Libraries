@@ -25,11 +25,21 @@ The user chose GitHub Actions for cloud processing and rejected the proposed gra
 | `src/libraries_search/lexical.py` | SQLite book rows and full-text candidate ranking |
 | `src/libraries_search/model.py` | Load pinned open-source E5 weights for our own inference |
 | `src/libraries_search/build.py` | Stream books, encode vectors, align rows, write manifest |
+| `src/libraries_search/shards.py` | Encode a checked, contiguous row range in a parallel job |
+| `src/libraries_search/assemble.py` | Verify all shards, join vectors, build keyword rows |
 | `src/libraries_search/publish.py` | Verify artifacts and upload only `search/v1/` files |
 | `src/libraries_search/search.py` | Select and combine keyword and semantic candidates |
-| `.github/workflows/build-search-index.yml` | Full cloud build, smoke test, upload, cleanup |
+| `.github/workflows/build-search-index.yml` | Four parallel cloud encoders, assembly, smoke test, upload, cleanup |
 | `tests/test_search_index.py` | Synthetic correctness and corruption checks |
 
 ## Verification and publication
 
-Local verification before the branch push: `python -m pytest -q` passed with 17 tests, `ruff check .` passed, the project installed with `pip install -e '.[dev]'`, all three new command help screens opened, and the full-data build command rejected a non-GitHub laptop run before downloading anything. The [corrected branch code check](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43669025099), [main code check](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43669092904), and [concurrent data-preparation refresh](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43669092892) passed. The [full search build](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43669092912) is still in progress. Record its result and verify the remote artifact files before claiming publication. No relevance-quality claim is made from synthetic tests or a smoke query.
+Local verification before the branch push: `python -m pytest -q` passed with 17 tests, `ruff check .` passed, the project installed with `pip install -e '.[dev]'`, all three new command help screens opened, and the full-data build command rejected a non-GitHub laptop run before downloading anything. The [corrected branch code check](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43669025099), [main code check](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43669092904), and [concurrent data-preparation refresh](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43669092892) passed. No relevance-quality claim is made from synthetic tests or a smoke query.
+
+## Full-build recovery — 2026-11-15
+
+The [first full search build](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43669092912) was cancelled at the workflow's three-hour limit. Its log shows steady encoding through 75,008/91,667 books, about 5,000 every 11–12 minutes; no source, model, or vector validation error preceded the cancellation. The smoke query and upload were skipped, and no index was published.
+
+The [parallel build plan](parallel-build-plan.md) keeps the source and model revisions and the same passage text, then divides source rows into four balanced ranges. Added `src/libraries_search/shards.py` for deterministic encoding and `src/libraries_search/assemble.py` for strict range, checksum, source/model, and vector checks before the SQLite build and final publication. The workflow uses four one-day Actions artifacts as temporary handoff files. Synthetic tests now cover range boundaries, assembled row order and search, and damaged or missing shards. The outcome of the next cloud run and remote artifact verification must be added below before claiming publication.
+
+Before the parallel branch push, `python -m pytest -q` passed 19 tests, `ruff check .` passed, both new command help screens opened, and the workflow parsed with four shard jobs and an assembly dependency. No real catalog or model was downloaded to the laptop for these checks.

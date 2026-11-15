@@ -30,6 +30,40 @@ class TextEncoder(Protocol):
     def encode(self, texts: list[str], **kwargs: Any) -> np.ndarray: ...
 
 
+def write_index_manifest(
+    output_dir: Path,
+    source_manifest: dict[str, Any],
+    *,
+    book_count: int,
+    source_revision: str,
+    model_repo: str,
+    model_revision: str,
+    dimensions: int,
+) -> dict[str, Any]:
+    """Record the same final artifact contract for serial and parallel builds."""
+    database_path = output_dir / "books.sqlite"
+    vectors_path = output_dir / "vectors.npy"
+    manifest: dict[str, Any] = {
+        "index_version": INDEX_VERSION,
+        "created_at_utc": datetime.now(UTC).isoformat(),
+        "source_dataset_repo": SOURCE_DATASET_REPO,
+        "source_revision": source_revision,
+        "source_parquet_sha256": source_manifest["parquet_sha256"],
+        "books_indexed": book_count,
+        "model_repo": model_repo,
+        "model_revision": model_revision,
+        "dimensions": dimensions,
+        "books_sqlite_sha256": sha256_file(database_path),
+        "vectors_npy_sha256": sha256_file(vectors_path),
+        "books_sqlite_bytes": database_path.stat().st_size,
+        "vectors_npy_bytes": vectors_path.stat().st_size,
+    }
+    (output_dir / "manifest.json").write_text(
+        json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    )
+    return manifest
+
+
 def build_index(
     parquet_path: Path,
     source_manifest: dict[str, Any],
@@ -101,25 +135,15 @@ def build_index(
         del vectors
         connection.close()
 
-    manifest: dict[str, Any] = {
-        "index_version": INDEX_VERSION,
-        "created_at_utc": datetime.now(UTC).isoformat(),
-        "source_dataset_repo": SOURCE_DATASET_REPO,
-        "source_revision": source_revision,
-        "source_parquet_sha256": source_manifest["parquet_sha256"],
-        "books_indexed": book_count,
-        "model_repo": model_repo,
-        "model_revision": model_revision,
-        "dimensions": dimensions,
-        "books_sqlite_sha256": sha256_file(database_path),
-        "vectors_npy_sha256": sha256_file(vectors_path),
-        "books_sqlite_bytes": database_path.stat().st_size,
-        "vectors_npy_bytes": vectors_path.stat().st_size,
-    }
-    (output_dir / "manifest.json").write_text(
-        json.dumps(manifest, indent=2, sort_keys=True) + "\n"
+    return write_index_manifest(
+        output_dir,
+        source_manifest,
+        book_count=book_count,
+        source_revision=source_revision,
+        model_repo=model_repo,
+        model_revision=model_revision,
+        dimensions=dimensions,
     )
-    return manifest
 
 
 def main() -> None:

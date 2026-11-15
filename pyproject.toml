@@ -22,6 +22,8 @@ search = ["numpy>=1.26,<3", "sentence-transformers==6.3.0"]
 libraries-prepare = "libraries_data.prepare:main"
 libraries-publish = "libraries_data.publish:main"
 libraries-build-index = "libraries_search.build:main"
+libraries-build-shard = "libraries_search.shards:main"
+libraries-assemble-index = "libraries_search.assemble:main"
 libraries-publish-index = "libraries_search.publish:main"
 libraries-search = "libraries_search.search:main"
 

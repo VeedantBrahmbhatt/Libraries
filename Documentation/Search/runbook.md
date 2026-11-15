@@ -17,14 +17,33 @@ The project environment and caches are ignored by Git. This step does not downlo
 1. Check the pinned `SOURCE_REVISION` and `MODEL_REVISION` in `src/libraries_search/config.py`. The source revision must contain the expected `manifest.json` and `data/books.parquet`.
 2. Confirm the GitHub Actions repository secret `HF_TOKEN` can write to `Tox1/LibrariesBookData`.
 3. Open **Actions → Build and publish owned search index → Run workflow** on `main`. The same workflow also runs when search code or its workflow reaches `main`.
-4. Follow the build, smoke-search, and publish steps. The job checks source and output checksums, schema, counts, vector dimensions, SQLite integrity, and row alignment before upload.
+4. Follow four parallel shard jobs, then the assemble, smoke-search, and publish job. Each shard checks the pinned source and its own vectors. Assembly rejects missing or changed shards, checks all row ranges and revisions, and verifies source and output checksums, schema, counts, vector dimensions, SQLite integrity, and row alignment before upload.
 5. Verify `search/v1/manifest.json`, `search/v1/books.sqlite`, and `search/v1/vectors.npy` in the Hugging Face dataset. Compare the published manifest with the Actions log.
 
-The workflow installs a CPU-only model runtime. It uses temporary runner disk and deletes both the source cache and output directory after every run. `HF_TOKEN` is available only in the publishing step. No index is committed to GitHub.
+The workflow installs a CPU-only model runtime. Four jobs each encode about one quarter of the books; their vector files are held as GitHub Actions artifacts for one day only. The assembly job joins the vectors in source order and builds the keyword index. All jobs use temporary runner disk and delete their source cache and output directories after every run. `HF_TOKEN` is available only in the publishing step. No index is committed to GitHub.
 
 ## Reading the search output
 
-`libraries-search --input-dir <remote-index-directory> --query 'climate adaptation' --mode hybrid --limit 10` runs our own keyword and semantic retrieval on an already downloaded index. Run this in a remote demo environment, not on a laptop under the current data-location rule. Modes are `keyword`, `semantic`, and `hybrid`; `--offset` selects later results. `rank_score` combines positions in the two result lists. It is not a probability or a confidence percentage.
+The index is a set of files, not a hosted search service. For an interactive search, run the code on a remote machine with the model and index files available there. The project does not currently provide a live UI or shared query server. The GitHub Actions smoke check is the reproducible cloud example.
+
+On a remote machine only, install `.[search]`, then fetch just the three published index files into a temporary directory:
+
+```bash
+export HF_HOME=/tmp/libraries-hf-cache
+python - <<'PY'
+from huggingface_hub import snapshot_download
+
+snapshot_download(
+    repo_id="Tox1/LibrariesBookData",
+    repo_type="dataset",
+    allow_patterns=["search/v1/*"],
+    local_dir="/tmp/libraries-search",
+)
+PY
+libraries-search --input-dir /tmp/libraries-search/search/v1 --query 'climate adaptation' --mode hybrid --limit 10
+```
+
+Delete those temporary directories when the remote session ends. Do not run these commands on a laptop under the current data-location rule. Modes are `keyword`, `semantic`, and `hybrid`; `--offset` selects later results. `rank_score` combines positions in the two result lists. It is not a probability or a confidence percentage.
 
 The workflow's smoke search proves that the published code can return results from the built index. It does not prove that students will find the results relevant; the [evaluation notes](../Evaluation/README.md) describe that separate requirement.
 
@@ -35,7 +54,7 @@ The workflow's smoke search proves that the published code can return results fr
 | Pinned source file or checksum changed | Stop. Compare the source revision and manifest before updating the pin. |
 | Model returns wrong dimensions, missing values, or non-unit vectors | Stop. Check the pinned model revision and encoding instructions. |
 | SQLite count or integrity fails | Stop. Do not upload a partial or misaligned index. |
-| GitHub runner runs out of time or space | Reduce batch size or split the build while keeping the same pinned inputs; do not silently switch to an external search provider. |
+| GitHub runner runs out of time or space | Inspect the completed log, adjust the build while keeping the same pinned inputs, and start a new workflow run. The temporary runner has no saved partial index, so a new run starts from the first book. Do not silently switch to an external search provider. |
 | Hugging Face 401/403 | Check the `HF_TOKEN` secret permissions without printing the token. |
 | Upload fails | Keep the previous index snapshot; rerun after fixing the cause. |
 
