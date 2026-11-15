@@ -8,6 +8,8 @@ The second phase added `src/libraries_search`: a pinned multilingual E5 encoder,
 
 The third phase adds `src/libraries_evaluation` and a GitHub Actions pilot. It compares all three owned search modes on 12 authored multilingual questions, publishes a small human-review sheet, and scores only a complete judged pool. The full index is used only on a temporary GitHub runner. See the [evaluation runbook](Evaluation/runbook.md) and [phase record](Evaluation/session-log.md). No relevance-quality claim is supported until people grade the returned books.
 
+The [first pilot run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43693270526) passed and produced 233 distinct pairs. The [review artifact](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43693270526/artifacts/14153335931) expires on 2026-12-15. No grades or relevance metrics exist yet. A `pyproject.toml` change also reran the catalog publisher; [that run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43693270595) passed with 91,667 books, while the pilot remains pinned to its earlier index revision.
+
 ## How to continue
 
 1. Read the [data preparation design](Data-Preparation/design.md), [field dictionary](Data-Preparation/data-dictionary.md), and [runbook](Data-Preparation/runbook.md).

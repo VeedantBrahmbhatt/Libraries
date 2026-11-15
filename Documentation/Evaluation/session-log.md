@@ -10,4 +10,10 @@ The collector runs keyword, semantic, and hybrid modes on every question, times 
 
 The GitHub Actions job uses temporary runner storage for the pinned index and model. Its browser summary contains the review pool, and its short-lived artifact contains the CSV files. No third-party search API selects candidates. The separate [runbook](runbook.md) covers operation and grading.
 
-Verification and cloud pilot details are recorded below after execution. No human relevance labels exist yet; quality targets remain unmeasured.
+Local verification passed: 32 tests, Ruff, workflow YAML parsing, and `git diff --check`. The real-index CLI refused a laptop run before downloading anything. The purpose branch `evaluate-search-quality` passed [GitHub checks](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43693158514), then was fast-forwarded to `main`. The GitHub connector could read checks but returned HTTP 403 when asked to create a pull request, so the authorized Git push was used.
+
+The [first cloud evaluation run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43693270526) passed on 2026-11-15. It collected 233 distinct question–book pairs from 12 questions, left every relevance grade blank, and deliberately skipped scoring. The [five-file review artifact](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43693270526/artifacts/14153335931) was uploaded successfully at 113,795 bytes and expires on 2026-12-15. The job's browser summary shows all review candidates without a laptop index download. These are operational results only; they do not establish that any returned book is useful.
+
+Changing `pyproject.toml` also triggered the existing [DOAB preparation workflow](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43693270595). It passed, again wrote 91,667 books, and published catalog revision `c436c43dfd58db15accea210aa5013bffdcfb6ce`. The evaluation remains pinned to the previously verified index revision `f54ded49b97a92ca8e5dce0463500043ea2a19a4`, so that catalog refresh does not alter this pilot's search input.
+
+Next: human reviewers grade every pair in the pilot sheet, and the team expands to 100–150 anonymous natural questions before treating any quality KPI as meaningful. No human relevance labels exist yet; quality targets remain unmeasured.
