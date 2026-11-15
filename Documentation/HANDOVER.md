@@ -10,6 +10,8 @@ The third phase adds `src/libraries_evaluation` and a GitHub Actions pilot. It c
 
 The [first pilot run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43693270526) passed and produced 233 distinct pairs. The [review artifact](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43693270526/artifacts/14153335931) expires on 2026-12-15. No grades or relevance metrics exist yet. A `pyproject.toml` change also reran the catalog publisher; [that run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43693270595) passed with 91,667 books, while the pilot remains pinned to its earlier index revision.
 
+The next handoff step saves the 233 ungraded pairs as [12 question files](../evaluation/review/pilot/README.md) in GitHub. The lightweight progress check accepts partial grading and rejects changed candidate rows. The full index is downloaded only when the cloud evaluation workflow is run. See the [question collection guide](Evaluation/question-collection.md) for the separate, larger study. Humans must supply all grades and natural questions; none are inferred by code.
+
 ## How to continue
 
 1. Read the [data preparation design](Data-Preparation/design.md), [field dictionary](Data-Preparation/data-dictionary.md), and [runbook](Data-Preparation/runbook.md).

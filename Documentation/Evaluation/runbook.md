@@ -7,11 +7,11 @@
 3. The job downloads the pinned published index and model to a temporary GitHub runner. It uses our `SearchEngine` for all three ranking modes. No full index is downloaded to a teammate's laptop.
 4. Open the completed job's **Summary** for the top examples and complete review pool. The **search-evaluation-pilot** artifact contains `runs.csv`, `timings.csv`, `review.csv`, `manifest.json`, and `summary.md`; GitHub retains it for 30 days.
 
-The job needs no Hugging Face token because the published dataset and model are public. It uses free GitHub Actions capacity, subject to the repository's available quota. The large index is discarded when the job ends. Only the small review output remains as a GitHub artifact during its retention period.
+The job needs no Hugging Face token because the published dataset and model are public. It uses free GitHub Actions capacity, subject to the repository's available quota. The large index is discarded when the job ends. The first pilot's 12 compact review sheets are now saved in GitHub, so grading does not depend on the artifact's 30-day retention.
 
 ## Judge the results
 
-Use `review.csv` as the exact grading template. Each row is one question–book pair returned by at least one mode. The same book may have different ranks across modes, but receives one grade per question. Read the title, subjects, abstract preview, and source page before assigning:
+Open [the pilot review folder](../../evaluation/review/pilot/README.md) in GitHub and choose a question file. Each row is one question–book pair returned by at least one mode. The files hide search ranks and sort books by ID to reduce ranking bias. Read the title, abstract preview, and source page before assigning:
 
 | Grade | Meaning |
 | --- | --- |
@@ -19,9 +19,11 @@ Use `review.csv` as the exact grading template. Each row is one question–book 
 | `1` | Partly useful or related |
 | `2` | Clearly useful for the question |
 
-Leave `relevance` blank when unsure and resolve it with another reviewer; a blank row cannot be scored. Do not change any other column. Keep names, email addresses, and real student details out of questions and judgments. The review output is small; it may be edited in a temporary CSV copy or in GitHub's browser, while the full catalog and index stay remote.
+Leave `relevance` blank when unsure and resolve it with another reviewer; a blank row cannot be scored. Change only the final grade column. Keep names, email addresses, and real student details out of questions and judgments. The 12 small files are the shared online source; the full catalog and index stay remote.
 
-Commit the completed sheet as `evaluation/judgments/pilot.csv` on a purpose-named branch, review it, then merge it into `main`. The next workflow run validates every row against the newly collected run and writes `metrics.json` only when every pooled pair has a valid 0/1/2 grade. If the question file, index, or ranking code changes, recollect and rejudge the new pool. A failed scoring step means the judgments are incomplete or no longer match, not that a search mode scored zero.
+In the first pilot, 37 of 233 rows have no abstract preview. Open their source links and judge from the available book description or contents; leave the grade blank if the evidence is insufficient.
+
+Commit each question file on a purpose-named branch and merge it into `main` after **Check human review progress** passes. That lightweight job counts grades without downloading the index. When it reaches 233 of 233, manually start **Collect and score owned search evaluation** on `main`. The job recollects the pinned candidates, checks that they match the review sheets, assembles a temporary judgment file, and writes `metrics.json` only after all grades are valid. If the question file, index, or ranking code changes the candidate pool, start a new review version. A stopped score step means inputs changed or labels are invalid, not that a search mode scored zero.
 
 ## Read the report
 
@@ -31,4 +33,4 @@ Commit the completed sheet as `evaluation/judgments/pilot.csv` on a purpose-name
 
 ## Change or rerun
 
-Edit `evaluation/queries/pilot.jsonl` only when intentionally changing the pilot. Keep stable IDs for unchanged questions. Run local synthetic tests with `python -m pytest -q` and `ruff check .`; the real-index command refuses to run outside GitHub Actions. Read [the design](design.md) before altering metric definitions, and record each change in [the session log](session-log.md) and root README.
+Edit `evaluation/queries/pilot.jsonl` only when intentionally changing the pilot. Keep stable IDs for unchanged questions. Run local synthetic tests with `python -m pytest -q` and `ruff check .`; the real-index command refuses to run outside GitHub Actions. Read [the design](design.md) and [review handoff design](review-design.md) before altering metric definitions or grading files, and record each change in [the session log](session-log.md) and root README.

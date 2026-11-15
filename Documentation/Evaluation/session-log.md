@@ -17,3 +17,11 @@ The [first cloud evaluation run](https://github.com/VeedantBrahmbhatt/Libraries/
 Changing `pyproject.toml` also triggered the existing [DOAB preparation workflow](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43693270595). It passed, again wrote 91,667 books, and published catalog revision `c436c43dfd58db15accea210aa5013bffdcfb6ce`. The evaluation remains pinned to the previously verified index revision `f54ded49b97a92ca8e5dce0463500043ea2a19a4`, so that catalog refresh does not alter this pilot's search input.
 
 Next: human reviewers grade every pair in the pilot sheet, and the team expands to 100–150 anonymous natural questions before treating any quality KPI as meaningful. No human relevance labels exist yet; quality targets remain unmeasured.
+
+## 2026-11-15: shared human review handoff
+
+The first pilot artifact was retrieved only as a small temporary ZIP, verified against its recorded query and review checksums, and used to create 12 question-specific CSV files in `evaluation/review/pilot/`. The files contain 233 selected metadata rows, about 120 KB in total, rather than the full catalog or index. They are sorted by book ID and omit search ranks to reduce grading bias. All 233 relevance cells remain blank. Of the 233 rows, 37 have no abstract preview; each still has an HTTPS source link.
+
+`src/libraries_evaluation/review.py` checks the frozen question–book pool, metadata, and grade values; it reports partial progress and assembles a full judgment file only after every row is graded. A lightweight workflow checks grading edits without downloading the index. The full evaluation workflow no longer runs after each review-file edit; a manual run after completion recollects and validates the pinned candidates before scoring. The [review design](review-design.md), [plan](review-implementation-plan.md), and [runbook](runbook.md) record the decisions and team steps. [Question collection guidance](question-collection.md) covers the later, larger natural-query study.
+
+Seven focused review tests passed after the missing-module red test; the complete suite passed 39 tests. Ruff, workflow YAML parsing, and whitespace checks passed locally. Cloud check results and final publication details are recorded after the branch is pushed.

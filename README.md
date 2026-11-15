@@ -14,6 +14,7 @@ The preparation workflow streams DOAB's [repository metadata export](https://www
 | `src/libraries_search/` | Keyword and meaning-based index building, publishing, and query ranking |
 | `src/libraries_evaluation/` | Comparable search runs, human-review pool, and judged scoring |
 | `evaluation/queries/` | Authored multilingual pilot questions; no student details |
+| `evaluation/review/pilot/` | Twelve small, shared CSV sheets for human grading of the pilot candidates |
 | `tests/` | Synthetic-record tests; no DOAB dump |
 | `.github/workflows/` | GitHub Actions validation and manual publication |
 | `Documentation/Data-Preparation/` | Design, steps, field definitions, operations, and session record |
@@ -29,6 +30,8 @@ See [the data preparation runbook](Documentation/Data-Preparation/runbook.md) fo
 See [the search runbook](Documentation/Search/runbook.md) for the four-part cloud index build, own-code ranking modes, output files, and failure handling. The full build is restricted to GitHub Actions so a teammate cannot accidentally download the dataset onto a laptop.
 
 See [the evaluation runbook](Documentation/Evaluation/runbook.md) to run the pilot in GitHub Actions, inspect the review pool, grade books, and read a scored report. The real-index evaluation command also runs only in GitHub Actions. It does not use Google's or Hugging Face's search ranking.
+
+The [pilot review sheets](evaluation/review/pilot/README.md) let teammates grade one question at a time in GitHub. A lightweight workflow checks partial progress without downloading the index. Once all 233 pairs have human grades, a manual cloud evaluation run validates the frozen candidate pool and calculates metrics. [Question collection guidance](Documentation/Evaluation/question-collection.md) explains the later 100–150-question study.
 
 ## Project status
 
