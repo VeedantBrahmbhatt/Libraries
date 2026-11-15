@@ -8,4 +8,6 @@ No book has a human relevance label yet. The collector leaves every grade blank,
 
 The [first cloud pilot](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43693270526) passed on 2026-11-15 and produced 233 distinct pairs for review. The [12 shared question sheets](../../evaluation/review/pilot/README.md) preserve the selected metadata in GitHub with blank grades. Its [original artifact](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43693270526/artifacts/14153335931) is available until 2026-12-15. Neither source contains completed judgments or a relevance report.
 
+The [review handoff cloud run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43694776677) verified that the saved sheets match a fresh search from the pinned index. The current progress is **0 of 233 graded**. No relevance KPI can be reported yet.
+
 For a later meaningful assessment, collect 100–150 natural, anonymous student-style questions across the intended languages. The provisional targets are 80% of questions with a clearly useful book in the top five, hybrid top-ten quality at least 10% above keyword-only, 95% known-title success at rank one, and 95% of warm searches under two seconds. These are targets, not achieved results.
