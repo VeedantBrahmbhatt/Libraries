@@ -18,4 +18,6 @@ This reduces wall time without changing the meaning of the book vectors or askin
 4. Test shard boundaries, exact row order, search over an assembled synthetic catalog, and damaged-shard rejection without downloading real data locally.
 5. Update the runbook, session record, handover, and README with the new workflow and the cloud run result.
 
-The new build is complete only after the cloud workflow succeeds and the three remote `search/v1/` files match its manifest.
+## Outcome
+
+The [parallel workflow](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43682889772) completed successfully in about 56 minutes. All four shard jobs encoded their assigned ranges and uploaded temporary artifacts; the assembler checked and joined them, returned results for `climate adaptation`, and [published the index](https://huggingface.co/datasets/Tox1/LibrariesBookData/commit/f54ded49b97a92ca8e5dce0463500043ea2a19a4). The remote dataset tree contains exactly `search/v1/manifest.json`, `search/v1/books.sqlite`, and `search/v1/vectors.npy`, with sizes matching the manifest. The first and last row ranges were `0:22916` and `68750:91667`, so the joined range covers every source row exactly once.

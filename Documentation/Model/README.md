@@ -5,3 +5,5 @@ The first search baseline uses [multilingual-e5-small](https://huggingface.co/in
 Each book is encoded from `semantic_text` with the required `passage: ` prefix. The query uses `query: `. Vectors are normalized and compared by our code. E5 truncates text after 512 tokens, so long abstracts may lose detail; the source field order preserves titles and subjects first. Low-resource languages may perform worse. The separate keyword index covers exact words, author names, and titles.
 
 The prepared catalog has no query-to-book relevance labels. This phase does not fine-tune E5 or claim that its cosine similarity is a probability. A graph autoencoder was discussed and excluded from the approved baseline.
+
+The [published search manifest](https://huggingface.co/datasets/Tox1/LibrariesBookData/raw/f54ded49b97a92ca8e5dce0463500043ea2a19a4/search/v1/manifest.json) confirms 384-dimensional vectors for all 91,667 prepared books using the pinned model revision. The successful build and one smoke query confirm operation, not measured relevance across languages or student tasks.
