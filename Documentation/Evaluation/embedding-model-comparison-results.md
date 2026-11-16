@@ -34,6 +34,8 @@ Compared question by question, E5 base hybrid newly succeeds on the affordable-h
 
 E5 base hybrid succeeds on 17/40 English, 1/2 German, 0/4 Spanish, and 0/4 French questions. Those language groups are tiny. The 50 questions were written by us for fictional personas and are all development cases; they are not natural student searches or an independent acceptance test. This comparison caps both trial models at 512 tokens, so it does not assess GTE's longer-context potential.
 
+With hindsight, taking a suitable first-five book from either E5 base mode would cover **20/50** questions. That is a diagnostic ceiling for these two already reviewed result lists, not a working ranking method: the system does not know a book is suitable at search time. It also remains far below the requested bar, so ranking changes alone on these result lists cannot close the gap.
+
 ## Decision pending GTE
 
 Do not promote E5 base based on a one-question gain. Finish the same frozen evaluation for GTE, compare first-five and first-result success, inspect per-question wins and losses, and then decide whether model size or ranking/data changes offer the better next step.
