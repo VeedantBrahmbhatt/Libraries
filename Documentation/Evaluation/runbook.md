@@ -40,6 +40,26 @@ Commit each question file on a purpose-named branch and merge it into `main` aft
 
 The separate `evaluation/ai-review/pilot-grades.csv` gives the assistant's 233 metadata-based grades. `evaluation/ai-review/pilot-metrics.json` holds their scored pilot results. These files must never be copied into the human review folder or called human judgments. The saved [book-recovery metrics](../../evaluation/diagnostics/answer-derived-metrics.json) belong to the [2026-11-15 cloud run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43775201104); its manifest records the exact question and index revisions. The full catalog and index stay off team laptops.
 
+## Repeat the 50-persona study
+
+The [50 fictional profiles](../../evaluation/personas/README.md), [design](persona-design.md), and [results](persona-results.md) belong to a separate development study. To run its search again, open **Actions → Evaluate 50 synthetic student searches → Run workflow** on `main`. The job checks that the profile file exports exactly to the frozen query file, uses the pinned index on a temporary runner, and uploads ranked results, warm timings, a metadata review pool, and a manifest. It does not score until a complete top-five label file exists for that exact candidate pool.
+
+To reproduce the saved scores from the small ZIP in Git, extract it to a temporary directory and run:
+
+```bash
+mkdir -p /tmp/libraries-persona-run
+unzip -q evaluation/personas/search-run-99e564e.zip -d /tmp/libraries-persona-run
+python -m libraries_evaluation.persona_score \
+  --personas evaluation/personas/student-personas.jsonl \
+  --queries evaluation/queries/student-personas.jsonl \
+  --run-dir /tmp/libraries-persona-run \
+  --labels evaluation/personas/ai-labels.csv \
+  --output /tmp/libraries-persona-metrics.json
+cmp /tmp/libraries-persona-metrics.json evaluation/personas/persona-metrics.json
+```
+
+The scorer checks the question hash, artifact checksums, and that every book shown in any mode's top five has one valid grade. `topic_grade=2` means the subject fits; `level_fit` records whether the preview supports the requested audience; `overall_grade=2` requires both. Only the top-five union is judged, so this study measures nDCG@5 and cannot answer the project's nDCG@10 target. Do not use these assistant grades as human review or assume a short abstract proves a book is readable. Delete the temporary extraction when done; it does not include the full catalog or index.
+
 ## Change or rerun
 
 Edit `evaluation/queries/pilot.jsonl` only when intentionally changing the pilot. Keep stable IDs for unchanged questions. Run local synthetic tests with `python -m pytest -q` and `ruff check .`; the real-index command refuses to run outside GitHub Actions. Read [the design](design.md) and [review handoff design](review-design.md) before altering metric definitions or grading files, and record each change in [the session log](session-log.md) and root README.
