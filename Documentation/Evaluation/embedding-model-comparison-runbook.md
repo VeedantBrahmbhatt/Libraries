@@ -6,11 +6,11 @@ This trial compares pinned E5 base and GTE multilingual base on the same 91,667-
 
 ## Cloud run
 
-The [comparison workflow](../../.github/workflows/compare-embedding-models.yml) runs on the purpose branch or by manual dispatch. It creates four verified vector shards per model, assembles each against the pinned v2 book database, and searches every question in semantic and hybrid modes. It never publishes a full experimental index. The public pinned source and models require no `HF_TOKEN` for this read-only trial.
+The [comparison workflow](../../.github/workflows/compare-embedding-models.yml) runs on the purpose branch or by manual dispatch. Its recovery version reuses four verified E5 base shards from [run 43848201040](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43848201040) and builds eight smaller GTE shards. Each model is assembled against the pinned v2 book database and tested on every question in semantic and hybrid modes. It never publishes a full experimental index. The public pinned source and models require no `HF_TOKEN` for this read-only trial. The E5 shard artifacts expire after one day, so this recovery run must start while they remain available.
 
 Each job stores the source, model, and full index only under GitHub's temporary runner directory and removes them at the end. Temporary vector-shard artifacts expire after one day. The two compact result artifacts contain only `runs.csv` and `manifest.json` and expire after 30 days. Save those two small artifacts in `evaluation/model-comparison/` after validating their checksums; do not commit vector shards, model files, or the full catalog.
 
-The first attempted run failed because Transformers 5 corrupted GTE's position buffer. Use only a complete run with all shards and both evaluation jobs successful. The workflow installs Transformers 4.57.6 for both models, and the loader refuses GTE under version 5 or later.
+The first attempted run failed because Transformers 5 corrupted GTE's position buffer. The corrected run then hit the four-hour limit on GTE while E5 finished. Use only successfully completed evaluation artifacts with full validated shards. The workflow installs Transformers 4.57.6 for both models, and the loader refuses GTE under version 5 or later.
 
 ## Relevance review and scores
 

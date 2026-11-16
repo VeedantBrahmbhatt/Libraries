@@ -11,6 +11,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   encode:
@@ -19,8 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        model: [e5-base, gte-base]
-        shard: [0, 1, 2, 3]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -38,15 +38,15 @@ jobs:
       - name: Encode one checked book shard
         run: >-
           python -m libraries_evaluation.embedding_model_trial encode
-          --model "${{ matrix.model }}"
+          --model gte-base
           --shard-index "${{ matrix.shard }}"
-          --shard-count 4
+          --shard-count 8
           --cache-dir "$HF_HOME"
           --output-dir "$RUNNER_TEMP/trial-shard"
       - name: Upload short-lived vector shard
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.model }}-shard-${{ matrix.shard }}
+          name: gte-base-shard-${{ matrix.shard }}
           path: ${{ runner.temp }}/trial-shard/
           if-no-files-found: error
           retention-days: 1
@@ -55,14 +55,64 @@ jobs:
         if: always()
         run: rm -rf "$RUNNER_TEMP/trial-shard" "$HF_HOME"
 
-  evaluate:
+  evaluate_e5:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Keep all model and index files on temporary runner storage
+        run: echo "HF_HOME=$RUNNER_TEMP/hf-cache" >> "$GITHUB_ENV"
+      - name: Install CPU-only PyTorch
+        run: python -m pip install 'torch==2.9.1+cpu' --index-url https://download.pytorch.org/whl/cpu
+      - name: Install project search tools
+        run: python -m pip install -e '.[search]'
+      - name: Pin compatible Transformers version for GTE
+        run: python -m pip install 'transformers==4.57.6'
+      - name: Reuse checked E5 shards from the completed encode run
+        uses: actions/download-artifact@v4
+        with:
+          pattern: e5-base-shard-*
+          path: ${{ runner.temp }}/trial-shards/
+          merge-multiple: false
+          github-token: ${{ github.token }}
+          run-id: 43848201040
+      - name: Restore standard shard directory names
+        run: |
+          for shard in 0 1 2 3; do
+            mv "$RUNNER_TEMP/trial-shards/e5-base-shard-$shard" \
+              "$RUNNER_TEMP/trial-shards/shard-$shard"
+          done
+      - name: Verify, assemble, and compare the same 50 questions
+        run: >-
+          python -m libraries_evaluation.embedding_model_trial evaluate
+          --model e5-base
+          --shard-count 4
+          --shards-dir "$RUNNER_TEMP/trial-shards"
+          --cache-dir "$HF_HOME"
+          --index-dir "$RUNNER_TEMP/trial-index"
+          --queries evaluation/queries/student-personas.jsonl
+          --output-dir "$RUNNER_TEMP/trial-results"
+      - name: Upload compact unjudged rankings and timings
+        uses: actions/upload-artifact@v4
+        with:
+          name: e5-base-trial-results
+          path: ${{ runner.temp }}/trial-results/
+          if-no-files-found: error
+          retention-days: 30
+      - name: Remove temporary source, model, and full index
+        if: always()
+        run: >-
+          rm -rf "$RUNNER_TEMP/trial-shards" "$RUNNER_TEMP/trial-index"
+          "$RUNNER_TEMP/trial-results" "$HF_HOME"
+
+  evaluate_gte:
     needs: encode
     runs-on: ubuntu-latest
     timeout-minutes: 120
-    strategy:
-      fail-fast: false
-      matrix:
-        model: [e5-base, gte-base]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -80,20 +130,20 @@ jobs:
       - name: Download checked temporary shards
         uses: actions/download-artifact@v4
         with:
-          pattern: ${{ matrix.model }}-shard-*
+          pattern: gte-base-shard-*
           path: ${{ runner.temp }}/trial-shards/
           merge-multiple: false
       - name: Restore standard shard directory names
         run: |
-          for shard in 0 1 2 3; do
-            mv "$RUNNER_TEMP/trial-shards/${{ matrix.model }}-shard-$shard" \
+          for shard in 0 1 2 3 4 5 6 7; do
+            mv "$RUNNER_TEMP/trial-shards/gte-base-shard-$shard" \
               "$RUNNER_TEMP/trial-shards/shard-$shard"
           done
       - name: Verify, assemble, and compare the same 50 questions
         run: >-
           python -m libraries_evaluation.embedding_model_trial evaluate
-          --model "${{ matrix.model }}"
-          --shard-count 4
+          --model gte-base
+          --shard-count 8
           --shards-dir "$RUNNER_TEMP/trial-shards"
           --cache-dir "$HF_HOME"
           --index-dir "$RUNNER_TEMP/trial-index"
@@ -102,7 +152,7 @@ jobs:
       - name: Upload compact unjudged rankings and timings
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.model }}-trial-results
+          name: gte-base-trial-results
           path: ${{ runner.temp }}/trial-results/
           if-no-files-found: error
           retention-days: 30
