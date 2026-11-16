@@ -389,7 +389,12 @@ def score_packet(
             field: dict(sorted(Counter(row[field] for row in sheets.values()).items()))
             for field in SHEET_FIELDS[-4:]
         },
-        "limits": "Authored development questions; independent student holdout not evaluated.",
+        "limits": (
+            "Holdout scores are separate; verify question provenance and reviewer independence "
+            "before an acceptance claim."
+            if "holdout" in by_split else
+            "No holdout questions in this packet; these scores are development evidence only."
+        ),
     }
 
 
@@ -432,9 +437,9 @@ def main() -> None:
             args.kind, args.archive, args.queries, args.packet_dir, **kwargs
         )
     elif args.command == "progress":
-        result = packet_progress(args.queries, args.packet_dir, args.archive, **kwargs)
         if args.score_output:
             args.score_output.unlink(missing_ok=True)
+        result = packet_progress(args.queries, args.packet_dir, args.archive, **kwargs)
         if args.summary:
             with args.summary.open("a", encoding="utf-8") as stream:
                 stream.write(_summary(result))

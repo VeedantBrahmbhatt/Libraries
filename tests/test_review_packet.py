@@ -34,11 +34,11 @@ def _write_archive(path, members):
             archive.writestr(name, data)
 
 
-def _doab_fixture(tmp_path):
+def _doab_fixture(tmp_path, *, split="development"):
     queries = tmp_path / "queries.jsonl"
     queries.write_text(json.dumps({
         "query_id": "q1", "text": "Easy book about AI", "language": "en",
-        "intent": "topic", "split": "development",
+        "intent": "topic", "split": split,
     }) + "\n", encoding="utf-8")
     orders = {
         "keyword": ["b1", "b2", "b3", "b4", "b5"],
@@ -119,6 +119,16 @@ def test_doab_packet_is_blind_and_scores_only_after_review(tmp_path):
     assert report["grade_counts"]["overall_grade"] == {"0": 7, "2": 1}
 
 
+def test_holdout_report_does_not_claim_holdout_was_unevaluated(tmp_path):
+    queries, archive = _doab_fixture(tmp_path, split="holdout")
+    packet = tmp_path / "packet"
+    initialize_packet("doab", archive, queries, packet)
+    _fill_sheet(packet / "q1.csv")
+    report = score_packet(queries, packet, archive)
+    assert report["by_split"]["holdout"]["query_count"] == 1
+    assert "holdout not evaluated" not in report["limits"].lower()
+
+
 def test_packet_rejects_modified_source_and_review_metadata(tmp_path):
     queries, archive = _doab_fixture(tmp_path)
     packet = tmp_path / "packet"
@@ -185,6 +195,23 @@ def test_score_command_removes_old_report_before_refusing_incomplete_review(tmp_
         "--output", str(old_score),
     ])
     with pytest.raises(ValueError, match="incomplete"):
+        main()
+    assert not old_score.exists()
+
+
+def test_progress_removes_old_report_even_when_packet_validation_fails(tmp_path, monkeypatch):
+    queries, archive = _doab_fixture(tmp_path)
+    packet = tmp_path / "packet"
+    initialize_packet("doab", archive, queries, packet)
+    old_score = tmp_path / "old-score.json"
+    old_score.write_text('{"false_claim": true}', encoding="utf-8")
+    (packet / "q1.csv").unlink()
+    monkeypatch.setattr("sys.argv", [
+        "review-packet", "progress", "--queries", str(queries),
+        "--archive", str(archive), "--packet-dir", str(packet),
+        "--score-output", str(old_score),
+    ])
+    with pytest.raises(ValueError, match="missing or extra"):
         main()
     assert not old_score.exists()
 
