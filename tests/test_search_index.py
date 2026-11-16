@@ -28,6 +28,17 @@ class FakeEncoder:
         return np.asarray([self.vectors[text] for text in texts], dtype=np.float32)
 
 
+class FakeReranker:
+    def __init__(self):
+        self.pairs = []
+
+    def predict(self, pairs, **_kwargs):
+        self.pairs.extend(pairs)
+        return np.asarray([
+            9.0 if "Marine resilience" in book_text else 1.0 for _, book_text in pairs
+        ])
+
+
 def _book(book_id: str, title: str, description: str) -> dict[str, object]:
     return {
         "book_id": book_id,
@@ -255,6 +266,51 @@ def test_existing_v1_index_remains_searchable(tmp_path):
         result = engine.search("Coastal planning", mode="keyword", limit=1)[0]
     assert result["book_id"] == "legacy"
     assert result["description_source"] == "abstract"
+
+
+def test_reranker_checks_full_query_against_grounded_candidates(tmp_path):
+    books = [
+        _book("a", "Coastal planning", "Sea level response"),
+        _book("b", "Urban studies", "Flooding in cities"),
+        _book("c", "Marine resilience", "Ocean conservation"),
+    ]
+    source, source_manifest = _source(tmp_path, books)
+    encoder = _encoder(books)
+    encoder.vectors["query: coastal adaptation with practical examples"] = [1.0, 0.0]
+    output = tmp_path / "index"
+    build_index(
+        source, source_manifest, output, encoder,
+        source_revision="source-commit", model_repo="example/model",
+        model_revision="model-commit", dimensions=2,
+    )
+    reranker = FakeReranker()
+    with SearchEngine(output, encoder, reranker=reranker) as engine:
+        results = engine.search(
+            "coastal adaptation with practical examples", mode="reranked", limit=3
+        )
+    assert results[0]["book_id"] == "c"
+    assert results[0]["score_kind"] == "cross_encoder_relative"
+    assert all("coastal adaptation" in query for query, _ in reranker.pairs)
+    assert all("Title:" in book_text and "Description:" in book_text
+               for _, book_text in reranker.pairs)
+
+
+def test_reranked_mode_requires_explicit_model(tmp_path):
+    books = [_book("a", "Coastal planning", "Sea level response")]
+    source, source_manifest = _source(tmp_path, books)
+    encoder = FakeEncoder({
+        f"passage: {books[0]['semantic_text']}": [1.0, 0.0],
+        "query: coastal adaptation": [1.0, 0.0],
+    })
+    output = tmp_path / "index"
+    build_index(
+        source, source_manifest, output, encoder,
+        source_revision="source-commit", model_repo="example/model",
+        model_revision="model-commit", dimensions=2,
+    )
+    with SearchEngine(output, encoder) as engine:
+        with pytest.raises(ValueError, match="reranker"):
+            engine.search("coastal adaptation", mode="reranked")
 
 
 def test_search_rejects_empty_query_and_invalid_page(tmp_path):
