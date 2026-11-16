@@ -39,6 +39,7 @@ def write_index_manifest(
     model_repo: str,
     model_revision: str,
     dimensions: int,
+    source_dataset_repo: str = SOURCE_DATASET_REPO,
 ) -> dict[str, Any]:
     """Record the same final artifact contract for serial and parallel builds."""
     database_path = output_dir / "books.sqlite"
@@ -46,7 +47,7 @@ def write_index_manifest(
     manifest: dict[str, Any] = {
         "index_version": INDEX_VERSION,
         "created_at_utc": datetime.now(UTC).isoformat(),
-        "source_dataset_repo": SOURCE_DATASET_REPO,
+        "source_dataset_repo": source_dataset_repo,
         "source_revision": source_revision,
         "source_parquet_sha256": source_manifest["parquet_sha256"],
         "books_indexed": book_count,
@@ -75,6 +76,7 @@ def build_index(
     model_revision: str,
     dimensions: int = EMBEDDING_DIMENSIONS,
     batch_size: int = 128,
+    source_dataset_repo: str = SOURCE_DATASET_REPO,
 ) -> dict[str, Any]:
     """Build one vector and one numbered keyword row per verified book."""
     parquet_path = Path(parquet_path)
@@ -143,6 +145,7 @@ def build_index(
         model_repo=model_repo,
         model_revision=model_revision,
         dimensions=dimensions,
+        source_dataset_repo=source_dataset_repo,
     )
 
 
