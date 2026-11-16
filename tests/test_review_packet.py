@@ -8,6 +8,7 @@ from zipfile import ZipFile
 
 import pytest
 
+from libraries_evaluation.assistant_v2_score import LABEL_FIELDS, score_assistant_packet
 from libraries_evaluation.review_packet import (
     initialize_packet,
     main,
@@ -250,3 +251,59 @@ def test_textbook_packet_matches_frozen_miss_list(tmp_path):
     assert manifest["candidate_count"] == 5
     assert packet_progress(queries, packet, archive, miss_report=misses)["complete"] is False
     assert (packet / "q1.csv").exists()
+
+
+def test_assistant_score_uses_separate_complete_labels_without_editing_human_sheets(tmp_path):
+    queries, archive = _doab_fixture(tmp_path)
+    packet = tmp_path / "packet"
+    initialize_packet("doab", archive, queries, packet)
+    with (packet / "q1.csv").open(newline="", encoding="utf-8") as stream:
+        candidates = list(csv.DictReader(stream))
+    labels = tmp_path / "assistant-labels.csv"
+    with labels.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=LABEL_FIELDS)
+        writer.writeheader()
+        writer.writerows({
+            "query_id": row["query_id"], "book_id": row["book_id"],
+            "clear_fit": "1" if row["book_id"] == "b2" else "0",
+            "basis": "new_preview", "evidence_url": "",
+        } for row in candidates)
+    report = score_assistant_packet(queries, packet, archive, labels)
+    assert report["assessment"] == "assistant_not_human"
+    assert report["modes"]["keyword"]["success_at_5"] == 1.0
+    assert report["modes"]["semantic"]["top_one_success_count"] == 1
+    assert report["modes"]["reranked"]["success_at_5"] == 0.0
+    assert report["modes"]["keyword"]["strong_precision_at_5"] == 0.2
+    assert report["modes"]["keyword"]["warm_p95_ms"] == 10.0
+    assert report["query_findings"]["q1"]["semantic"]["first_clear_rank"] == 1
+    assert report["query_findings"]["q1"]["reranked"]["first_clear_rank"] is None
+    assert packet_progress(queries, packet, archive)["graded_count"] == 0
+
+    with labels.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=LABEL_FIELDS)
+        writer.writeheader()
+        writer.writerows({
+            "query_id": row["query_id"], "book_id": row["book_id"],
+            "clear_fit": "0", "basis": "new_preview", "evidence_url": "",
+        } for row in candidates[:-1])
+    with pytest.raises(ValueError, match="missing"):
+        score_assistant_packet(queries, packet, archive, labels)
+
+
+def test_assistant_score_describes_holdout_accurately(tmp_path):
+    queries, archive = _doab_fixture(tmp_path, split="holdout")
+    packet = tmp_path / "packet"
+    initialize_packet("doab", archive, queries, packet)
+    with (packet / "q1.csv").open(newline="", encoding="utf-8") as stream:
+        candidates = list(csv.DictReader(stream))
+    labels = tmp_path / "assistant-labels.csv"
+    with labels.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=LABEL_FIELDS)
+        writer.writeheader()
+        writer.writerows({
+            "query_id": row["query_id"], "book_id": row["book_id"],
+            "clear_fit": "0", "basis": "new_preview", "evidence_url": "",
+        } for row in candidates)
+    report = score_assistant_packet(queries, packet, archive, labels)
+    assert "authored development" not in report["limits"]
+    assert report["by_split"]["holdout"]["query_count"] == 1
