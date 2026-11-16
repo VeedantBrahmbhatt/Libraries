@@ -1,10 +1,10 @@
 # Libraries
 
-Libraries is an NYU-focused prototype for discovering open-access books. The repository contains **data preparation**, a project-owned **keyword and multilingual semantic search baseline**, and a **search-quality evaluation pilot**. A student-facing interface is a later phase.
+Libraries is an NYU-focused prototype for discovering open-access books. The repository contains **data preparation**, a project-owned **keyword and multilingual semantic search baseline**, an experimental second ranking pass, and **search-quality evaluations**. A student-facing interface is a later phase.
 
 ## Current phase
 
-The project is testing whether its own search returns books that fit a student's subject and reading needs. The [50-persona report](Documentation/Evaluation/persona-results.md) is the latest diagnostic; the next quality step is real anonymous student questions and human review. The underlying catalog comes from DOAB's [repository metadata export](https://www.doabooks.org/en/researchers/full-faq) and is shared through [Tox1/LibrariesBookData](https://huggingface.co/datasets/Tox1/LibrariesBookData). DOAB metadata is CC0; individual books have their own licenses. No raw DOAB dataset is committed here.
+The project is testing whether its own search returns books that fit a student's subject and reading needs. The [query-fit and collection-coverage report](Documentation/Evaluation/query-fit-results.md) is the latest diagnostic; the next quality step is real anonymous student questions and human review. The underlying catalog comes from DOAB's [repository metadata export](https://www.doabooks.org/en/researchers/full-faq) and is shared through [Tox1/LibrariesBookData](https://huggingface.co/datasets/Tox1/LibrariesBookData). DOAB metadata is CC0; individual books have their own licenses. No raw DOAB dataset is committed here.
 
 ## Repository guide
 
@@ -18,6 +18,8 @@ The project is testing whether its own search returns books that fit a student's
 | `evaluation/ai-review/` | Separate AI grades and pilot diagnostic metrics; no human grades |
 | `evaluation/diagnostics/` | Saved book-recovery metrics from the cloud run |
 | `evaluation/personas/` | Fifty fictional student scenarios, their small search artifact, assistant grades, and findings |
+| `evaluation/metadata/` | Small source-field coverage report; no book dataset |
+| `evaluation/query-fit/` | Compact cloud ranking and supplemental-coverage artifacts |
 | `tests/` | Synthetic-record tests; no DOAB dump |
 | `.github/workflows/` | GitHub Actions validation and manual publication |
 | `Documentation/Data-Preparation/` | Design, steps, field definitions, operations, and session record |
@@ -33,6 +35,8 @@ See [the data preparation runbook](Documentation/Data-Preparation/runbook.md) fo
 See [the search runbook](Documentation/Search/runbook.md) for the four-part cloud index build, own-code ranking modes, output files, and failure handling. The full build is restricted to GitHub Actions so a teammate cannot accidentally download the dataset onto a laptop.
 
 See [the evaluation runbook](Documentation/Evaluation/runbook.md) to run the pilot in GitHub Actions, inspect the review pool, grade books, and read a scored report. The real-index evaluation command also runs only in GitHub Actions. It does not use Google's or Hugging Face's search ranking.
+
+See [the query-fit runbook](Documentation/Evaluation/query-fit-runbook.md) for the new metadata, second-ranking, and supplemental-catalog cloud jobs. The exact outcomes and limits are in the [query-fit report](Documentation/Evaluation/query-fit-results.md). The full source and search indexes remain off team laptops.
 
 The [pilot review sheets](evaluation/review/pilot/README.md) let teammates grade one question at a time in GitHub. A lightweight workflow checks partial progress without downloading the index. Once all 233 pairs have human grades, a manual cloud evaluation run validates the frozen candidate pool and calculates metrics. [Question collection guidance](Documentation/Evaluation/question-collection.md) explains the later 100–150-question study.
 
@@ -52,4 +56,6 @@ The earlier [answer-derived report](Documentation/Evaluation/answer-derived-resu
 
 The [50-persona follow-up](Documentation/Evaluation/persona-results.md) tests fictional undergraduate and graduate requests that include study level and reading needs. The [cloud run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43776657495) passed. From 599 assistant-judged top-five question–book pairs, a clearly suitable book appeared for **11/50 keyword**, **14/50 semantic**, and **15/50 hybrid** searches. Hybrid narrowly leads on top-five fit, while semantic has more suitable first results and lower warm latency. No mode meets the provisional 80% top-five bar in this diagnostic. The [50 individual findings](evaluation/personas/persona-findings.csv), [scores](evaluation/personas/persona-metrics.json), and compact [source artifact](evaluation/personas/search-run-99e564e.zip) are in Git. These synthetic questions and assistant judgments are not real student validation.
 
-DOAB's website advertises over 111,000 books, more than this official export yielded. Treat this as an export snapshot for the prototype, not proven coverage of every live-site title. A student-facing interface and a larger, human-judged study are later phases. Update this README and the relevant `Documentation/` folder after each phase.
+The latest [query-fit phase](Documentation/Evaluation/query-fit-results.md) audited all 50 misses, added source-provided descriptions and alternate titles to a [versioned v2 index](https://huggingface.co/datasets/Tox1/LibrariesBookData/tree/b745902168aca10589fd0b376b58eb8019291b37/search/v2), parsed explicitly stated reading needs, and tested a multilingual second ranking pass. The new pass is **experimental**: its runner p95 was about **7.5 seconds** and many new results are unjudged, so it is not the UI default. A separate cloud test indexed **1,915** Open Textbook Library records from its complete CSV snapshot to inspect coverage gaps; it did not merge those books into DOAB. The target of more than 40 suitable top-five searches out of 50 is **not established**. The [small artifacts](evaluation/query-fit/) and cloud links are saved in the report.
+
+DOAB's website advertises over 111,000 books, more than this official export yielded. Treat this as an export snapshot for the prototype, not proven coverage of every live-site title. Human ratings and held-out quality testing are the next steps; a shareable five-result interface and free deployment follow the ranking decision. Update this README and the relevant `Documentation/` folder after each phase.

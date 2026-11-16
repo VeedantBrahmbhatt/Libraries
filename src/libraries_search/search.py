@@ -107,7 +107,7 @@ class SearchEngine:
             raise ValueError("Search limit must be between 1 and 100")
         if offset < 0 or offset > 400:
             raise ValueError("Search offset must be between 0 and 400")
-        if mode == "reranked" and (limit > RERANK_POOL or offset >= RERANK_POOL):
+        if mode == "reranked" and offset + limit > RERANK_POOL:
             raise ValueError("Reranked pages must fit inside the 50-book candidate pool")
 
         candidates = min(MAX_CANDIDATES, max(100, limit + offset))

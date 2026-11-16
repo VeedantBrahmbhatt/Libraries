@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import os
 from collections import Counter
 from collections.abc import Iterable, Mapping
 from pathlib import Path
@@ -61,6 +62,8 @@ def main() -> None:
     parser.add_argument("--cache-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if os.environ.get("GITHUB_ACTIONS") != "true":
+        parser.error("Full-source metadata audits run only in GitHub Actions")
     from libraries_search.source import download_source
 
     parquet_path, source_manifest = download_source(args.cache_dir)

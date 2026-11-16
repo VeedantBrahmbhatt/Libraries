@@ -24,3 +24,7 @@
 ## Verification and handoff
 
 Run project tests and lint locally with synthetic fixtures, then a cloud job against the pinned index. Update the README, evaluation documentation, session log, and handover with exact commands, artifact revisions, measured outcomes, limits, and the next UI/deployment boundary. Push a purpose-named branch and merge only after checks pass.
+
+## Execution record
+
+Tasks 1–4 were implemented and tested. Task 5 produced a separate 1,915-book cloud coverage experiment from the unfiltered Open Textbook Library CSV; the supplement was not merged because language, duplicate, and human-fit checks remain. See [the results](query-fit-results.md) for the exact cloud runs and limits. Human ratings and the held-out acceptance retest are the next two steps and were intentionally left untouched at this checkpoint.

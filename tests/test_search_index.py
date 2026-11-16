@@ -313,6 +313,21 @@ def test_reranked_mode_requires_explicit_model(tmp_path):
             engine.search("coastal adaptation", mode="reranked")
 
 
+def test_reranked_page_cannot_exceed_candidate_pool(tmp_path):
+    books = [_book("a", "Coastal planning", "Sea level response")]
+    source, source_manifest = _source(tmp_path, books)
+    encoder = FakeEncoder({f"passage: {books[0]['semantic_text']}": [1.0, 0.0]})
+    output = tmp_path / "index"
+    build_index(
+        source, source_manifest, output, encoder,
+        source_revision="source-commit", model_repo="example/model",
+        model_revision="model-commit", dimensions=2,
+    )
+    with SearchEngine(output, encoder, reranker=FakeReranker()) as engine:
+        with pytest.raises(ValueError, match="50-book candidate pool"):
+            engine.search("coastal adaptation", mode="reranked", limit=10, offset=45)
+
+
 def test_search_rejects_empty_query_and_invalid_page(tmp_path):
     books = [_book("a", "Coastal planning", "Sea level response")]
     source, source_manifest = _source(tmp_path, books)

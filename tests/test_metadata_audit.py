@@ -1,6 +1,10 @@
 """Only source-provided values can close a metadata gap."""
 
-from libraries_evaluation.metadata_audit import summarize_book_fields
+import sys
+
+import pytest
+
+from libraries_evaluation.metadata_audit import main, summarize_book_fields
 
 
 def test_summarize_book_fields_separates_recoverable_and_unrecoverable_gaps():
@@ -22,3 +26,15 @@ def test_summarize_book_fields_separates_recoverable_and_unrecoverable_gaps():
         "classifications_available_for_missing_subjects": 1,
         "alternate_titles_available": 1,
     }
+
+
+def test_full_source_audit_cli_refuses_laptop_run(tmp_path, monkeypatch):
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+    monkeypatch.setattr(sys, "argv", [
+        "metadata-audit", "--cache-dir", str(tmp_path / "cache"),
+        "--output", str(tmp_path / "report.json"),
+    ])
+    with pytest.raises(SystemExit) as error:
+        main()
+    assert error.value.code == 2
+    assert not (tmp_path / "cache").exists()
