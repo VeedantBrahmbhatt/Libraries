@@ -20,11 +20,14 @@ def create_database(path: Path) -> sqlite3.Connection:
             abstract TEXT NOT NULL,
             languages TEXT NOT NULL,
             publication_year INTEGER,
-            book_url TEXT NOT NULL
+            book_url TEXT NOT NULL,
+            alternate_titles TEXT NOT NULL,
+            description_source TEXT NOT NULL
         )"""
     )
     connection.execute(
-        "CREATE VIRTUAL TABLE books_fts USING fts5(title, authors, subjects, abstract)"
+        "CREATE VIRTUAL TABLE books_fts USING "
+        "fts5(title, alternate_titles, authors, subjects, abstract)"
     )
     return connection
 
@@ -37,42 +40,56 @@ def insert_books(
         ordinal = start_ordinal + offset
         authors = list(book["authors"])
         subjects = list(book["subjects"])
+        alternate_titles = list(book["alternate_titles"])
+        abstract = str(book["abstract"] or book["other_language_abstract"] or "")
+        description_source = (
+            "abstract" if book["abstract"] else
+            "other_language_abstract" if book["other_language_abstract"] else ""
+        )
         connection.execute(
-            "INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO books VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             (
                 ordinal,
                 book["book_id"],
                 book["title"],
                 json.dumps(authors, ensure_ascii=False),
                 json.dumps(subjects, ensure_ascii=False),
-                book["abstract"],
+                abstract,
                 json.dumps(book["languages"], ensure_ascii=False),
                 book["publication_year"],
                 book["book_url"],
+                json.dumps(alternate_titles, ensure_ascii=False),
+                description_source,
             ),
         )
         connection.execute(
-            "INSERT INTO books_fts(rowid, title, authors, subjects, abstract) "
-            "VALUES (?, ?, ?, ?, ?)",
+            "INSERT INTO books_fts(rowid, title, alternate_titles, authors, subjects, abstract) "
+            "VALUES (?, ?, ?, ?, ?, ?)",
             (
                 ordinal,
                 book["title"],
+                " ".join(alternate_titles),
                 " ".join(authors),
                 " ".join(subjects),
-                book["abstract"],
+                abstract,
             ),
         )
 
 
-def keyword_candidates(connection: sqlite3.Connection, query: str, limit: int) -> list[int]:
+def keyword_candidates(
+    connection: sqlite3.Connection, query: str, limit: int, *, index_version: int = 2
+) -> list[int]:
     """Return our BM25-ranked book row numbers using safe literal query terms."""
     terms = re.findall(r"\w+", query, flags=re.UNICODE)[:16]
     if not terms:
         return []
     expression = " OR ".join(f'"{term}"' for term in terms)
+    if index_version not in {1, 2}:
+        raise ValueError("Unsupported keyword index version")
+    weights = "8.0, 5.0, 4.0, 1.0" if index_version == 1 else "8.0, 6.0, 5.0, 4.0, 1.0"
     rows = connection.execute(
         "SELECT rowid FROM books_fts WHERE books_fts MATCH ? "
-        "ORDER BY bm25(books_fts, 8.0, 5.0, 4.0, 1.0), rowid LIMIT ?",
+        f"ORDER BY bm25(books_fts, {weights}), rowid LIMIT ?",
         (expression, limit),
     )
     return [int(row[0]) for row in rows]

@@ -22,7 +22,7 @@ class SearchEngine:
 
     def __init__(self, input_dir: Path, encoder: TextEncoder):
         input_dir = Path(input_dir)
-        self.manifest = validate_index_bundle(input_dir)
+        self.manifest = validate_index_bundle(input_dir, expected_version=None)
         self.encoder = encoder
         self.vectors = np.load(input_dir / "vectors.npy", mmap_mode="r", allow_pickle=False)
         self.database = sqlite3.connect(
@@ -83,7 +83,9 @@ class SearchEngine:
 
         candidates = min(MAX_CANDIDATES, max(100, limit + offset))
         keyword_order = (
-            keyword_candidates(self.database, query, candidates)
+            keyword_candidates(
+                self.database, query, candidates, index_version=self.manifest["index_version"]
+            )
             if mode in {"keyword", "hybrid"}
             else []
         )
@@ -111,6 +113,8 @@ class SearchEngine:
         results: list[dict[str, Any]] = []
         for ordinal in selected:
             row = by_ordinal[ordinal]
+            description = (row["abstract"] or "").strip()
+            excerpt = description[:500].rsplit(" ", 1)[0] if len(description) > 500 else description
             results.append(
                 {
                     "book_id": row["book_id"],
@@ -120,6 +124,11 @@ class SearchEngine:
                     "languages": json.loads(row["languages"]),
                     "publication_year": row["publication_year"],
                     "book_url": row["book_url"],
+                    "description_excerpt": excerpt,
+                    "description_source": (
+                        row["description_source"] if "description_source" in row.keys()
+                        else "abstract" if description else ""
+                    ),
                     "rank_score": round(rank_scores[ordinal], 8),
                     "score_kind": "relative_rank_fusion",
                     "keyword_rank": keyword_ranks.get(ordinal),
@@ -140,7 +149,7 @@ def main() -> None:
     parser.add_argument("--limit", type=int, default=10)
     parser.add_argument("--offset", type=int, default=0)
     args = parser.parse_args()
-    manifest = validate_index_bundle(args.input_dir)
+    manifest = validate_index_bundle(args.input_dir, expected_version=None)
     model = load_model(manifest["model_repo"], manifest["model_revision"])
     with SearchEngine(args.input_dir, model) as engine:
         print(

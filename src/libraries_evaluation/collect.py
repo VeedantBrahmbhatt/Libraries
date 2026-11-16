@@ -209,7 +209,7 @@ def main() -> None:
         )
     )
     index_dir = root / INDEX_PATH
-    index_manifest = validate_index_bundle(index_dir)
+    index_manifest = validate_index_bundle(index_dir, expected_version=None)
     encoder = load_model(index_manifest["model_repo"], index_manifest["model_revision"])
     with SearchEngine(index_dir, encoder) as engine:
         manifest = collect_results(

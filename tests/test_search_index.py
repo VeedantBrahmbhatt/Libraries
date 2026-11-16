@@ -11,10 +11,11 @@ import pytest
 
 from libraries_data.schema import BOOK_SCHEMA
 from libraries_search.assemble import assemble_index
-from libraries_search.build import build_index
+from libraries_search.build import build_index, write_index_manifest
 from libraries_search.publish import publish_index, validate_index_bundle
 from libraries_search.search import SearchEngine
 from libraries_search.shards import build_shard
+from libraries_search.upgrade import upgrade_index
 
 
 class FakeEncoder:
@@ -159,6 +160,101 @@ def test_search_uses_our_keyword_and_semantic_lists(tmp_path):
     assert hybrid[0]["semantic_rank"] == 1
     assert hybrid[0]["score_kind"] == "relative_rank_fusion"
     assert "query: coastal adaptation" in encoder.inputs
+
+
+def test_source_description_and_alternate_title_are_searchable_with_provenance(tmp_path):
+    book = _book("a", "Primary title", "")
+    book["alternate_titles"] = ["Hidden coastal guide"]
+    book["other_language_abstract"] = "An original source description in another language."
+    book["semantic_text"] = (
+        "Title: Primary title\nAlternative title: Hidden coastal guide\n"
+        "Subject: Cities\nOther-language description: "
+        "An original source description in another language."
+    )
+    source, source_manifest = _source(tmp_path, [book])
+    output = tmp_path / "index"
+    build_index(
+        source, source_manifest, output,
+        FakeEncoder({f"passage: {book['semantic_text']}": [1.0, 0.0]}),
+        source_revision="source-commit", model_repo="example/model",
+        model_revision="model-commit", dimensions=2,
+    )
+
+    with sqlite3.connect(output / "books.sqlite") as database:
+        row = database.execute(
+            "SELECT abstract, description_source FROM books WHERE book_id = 'a'"
+        ).fetchone()
+        assert row == (book["other_language_abstract"], "other_language_abstract")
+    with SearchEngine(output, FakeEncoder({})) as engine:
+        result = engine.search("Hidden coastal guide", mode="keyword", limit=1)[0]
+    assert result["book_id"] == "a"
+    assert result["description_source"] == "other_language_abstract"
+    assert result["description_excerpt"].startswith("An original source description")
+
+
+def test_upgrade_keeps_existing_vectors_and_checks_source_order(tmp_path):
+    books = [_book("a", "Coastal planning", "Sea level response"),
+             _book("b", "Urban studies", "Flooding in cities")]
+    source, source_manifest = _source(tmp_path, books)
+    old_dir = tmp_path / "old"
+    old_manifest = build_index(
+        source, source_manifest, old_dir, FakeEncoder({
+            f"passage: {books[0]['semantic_text']}": [1.0, 0.0],
+            f"passage: {books[1]['semantic_text']}": [0.0, 1.0],
+        }),
+        source_revision="source-commit", model_repo="example/model",
+        model_revision="model-commit", dimensions=2,
+    )
+    old_manifest["index_version"] = 1
+    (old_dir / "manifest.json").write_text(json.dumps(old_manifest))
+    new_dir = tmp_path / "new"
+    manifest = upgrade_index(source, source_manifest, old_dir, new_dir)
+
+    assert manifest["index_version"] == 2
+    assert manifest["vectors_npy_sha256"] == old_manifest["vectors_npy_sha256"]
+    assert validate_index_bundle(new_dir)["books_indexed"] == 2
+
+    bad_books = list(reversed(books))
+    (tmp_path / "different").mkdir()
+    bad_source, bad_manifest = _source(tmp_path / "different", bad_books)
+    old_manifest["source_parquet_sha256"] = bad_manifest["parquet_sha256"]
+    (old_dir / "manifest.json").write_text(json.dumps(old_manifest))
+    with pytest.raises(ValueError, match="order"):
+        upgrade_index(bad_source, bad_manifest, old_dir, tmp_path / "bad-output")
+
+
+def test_existing_v1_index_remains_searchable(tmp_path):
+    index = tmp_path / "legacy"
+    index.mkdir()
+    np.save(index / "vectors.npy", np.array([[1.0, 0.0]], dtype=np.float32))
+    with sqlite3.connect(index / "books.sqlite") as database:
+        database.execute(
+            "CREATE TABLE books (ordinal INTEGER PRIMARY KEY, book_id TEXT, title TEXT, "
+            "authors TEXT, subjects TEXT, abstract TEXT, languages TEXT, "
+            "publication_year INTEGER, book_url TEXT)"
+        )
+        database.execute(
+            "CREATE VIRTUAL TABLE books_fts USING fts5(title, authors, subjects, abstract)"
+        )
+        database.execute(
+            "INSERT INTO books VALUES (1, 'legacy', 'Coastal planning', '[]', '[]', "
+            "'Sea level response', '[\"eng\"]', 2024, 'https://example.org/legacy')"
+        )
+        database.execute(
+            "INSERT INTO books_fts(rowid, title, authors, subjects, abstract) "
+            "VALUES (1, 'Coastal planning', '', '', 'Sea level response')"
+        )
+    manifest = write_index_manifest(
+        index, {"parquet_sha256": "source-checksum"}, book_count=1,
+        source_revision="source-commit", model_repo="example/model",
+        model_revision="model-commit", dimensions=2,
+    )
+    manifest["index_version"] = 1
+    (index / "manifest.json").write_text(json.dumps(manifest))
+    with SearchEngine(index, FakeEncoder({})) as engine:
+        result = engine.search("Coastal planning", mode="keyword", limit=1)[0]
+    assert result["book_id"] == "legacy"
+    assert result["description_source"] == "abstract"
 
 
 def test_search_rejects_empty_query_and_invalid_page(tmp_path):
@@ -369,7 +465,7 @@ def test_publisher_uploads_only_the_versioned_search_files(tmp_path, monkeypatch
     assert len(calls) == 1
     assert calls[0]["repo_type"] == "dataset"
     assert {item.path_in_repo for item in calls[0]["operations"]} == {
-        "search/v1/manifest.json",
-        "search/v1/books.sqlite",
-        "search/v1/vectors.npy",
+        "search/v2/manifest.json",
+        "search/v2/books.sqlite",
+        "search/v2/vectors.npy",
     }

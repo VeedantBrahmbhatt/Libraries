@@ -16,14 +16,17 @@ from libraries_search.source import sha256_file
 ARTIFACTS = ("manifest.json", "books.sqlite", "vectors.npy")
 
 
-def validate_index_bundle(input_dir: Path) -> dict[str, Any]:
+def validate_index_bundle(
+    input_dir: Path, *, expected_version: int | None = INDEX_VERSION
+) -> dict[str, Any]:
     """Reject missing, corrupt, or misaligned index files before upload or search."""
     input_dir = Path(input_dir)
     for name in ARTIFACTS:
         if not (input_dir / name).is_file():
             raise ValueError(f"Missing search artifact: {name}")
     manifest = json.loads((input_dir / "manifest.json").read_text())
-    if manifest.get("index_version") != INDEX_VERSION:
+    supported = {1, INDEX_VERSION} if expected_version is None else {expected_version}
+    if manifest.get("index_version") not in supported:
         raise ValueError("Search index version is unsupported")
     count = manifest.get("books_indexed")
     dimensions = manifest.get("dimensions")
@@ -56,7 +59,7 @@ def validate_index_bundle(input_dir: Path) -> dict[str, Any]:
 
 
 def publish_index(input_dir: Path, token: str) -> str:
-    """Commit the three verified files under search/v1 without replacing metadata."""
+    """Commit the three verified files under the current versioned search path."""
     if not token:
         raise ValueError("HF_TOKEN is required to publish the search index")
     manifest = validate_index_bundle(input_dir)
