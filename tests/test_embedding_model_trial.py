@@ -14,6 +14,7 @@ from libraries_evaluation.embedding_model_trial import (
     TRIAL_MODELS,
     TrialEncoder,
     assemble_trial,
+    check_transformers_compatibility,
     collect_trial,
 )
 from libraries_search.build import build_index
@@ -57,6 +58,13 @@ def test_trial_encoders_use_model_specific_input_conventions():
     )
     assert e5_model.inputs == ["query: First subject", "passage: Second book"]
     assert gte_model.inputs == ["First subject", "Second book"]
+
+
+def test_gte_rejects_transformers_five_to_avoid_corrupt_position_ids():
+    check_transformers_compatibility(TRIAL_MODELS["e5-base"], "5.23.0")
+    check_transformers_compatibility(TRIAL_MODELS["gte-base"], "4.57.6")
+    with pytest.raises(RuntimeError, match="transformers<5"):
+        check_transformers_compatibility(TRIAL_MODELS["gte-base"], "5.23.0")
 
 
 def test_assemble_trial_reuses_verified_book_database_and_rejects_bad_shard(tmp_path):

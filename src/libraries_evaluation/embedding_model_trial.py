@@ -76,10 +76,18 @@ class TrialEncoder:
         return self.model.encode(prepared, **kwargs)
 
 
+def check_transformers_compatibility(spec: TrialModel, version: str) -> None:
+    """Prevent GTE's known silent position-buffer corruption under Transformers 5."""
+    if spec.key == "gte-base" and int(version.split(".", 1)[0]) >= 5:
+        raise RuntimeError("GTE requires transformers<5 for correct position IDs")
+
+
 def load_trial_encoder(spec: TrialModel) -> TrialEncoder:
     """Load an exact model revision only on temporary cloud runners."""
+    import transformers
     from sentence_transformers import SentenceTransformer
 
+    check_transformers_compatibility(spec, transformers.__version__)
     model = SentenceTransformer(
         spec.repo, revision=spec.revision, device="cpu",
         trust_remote_code=not spec.use_e5_prefix,

@@ -23,3 +23,7 @@ The current baseline is hybrid **17/50** under assistant review. More than 40/50
 2. Add one cloud-only trial command and a branch-scoped workflow that runs four shards per model, then assembles, searches, and uploads only compact results.
 3. Verify local tests and lint; push the purpose branch and monitor cloud jobs, fixing concrete failures.
 4. Download only compact results, validate them, review new pairs, compute the same KPIs as the current baseline, and update the README, evaluation record, and handover.
+
+## Cloud compatibility finding
+
+The first GTE shard run failed on its first batch with a nonsensical `position_ids` index. GitHub Actions had installed Transformers 5.23.0; the [model's own issue #30](https://huggingface.co/Alibaba-NLP/gte-multilingual-base/discussions/30) identifies uninitialized position buffers with Transformers 5 and warns they can also silently produce wrong embeddings. Pin Transformers 4.57.6 for both trial models and reject GTE loading under version 5 or later. The failed run produced no trustworthy GTE vectors or score. Rerun after the pin; do not reuse any failed shard artifact.
