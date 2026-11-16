@@ -15,6 +15,19 @@ E5 base adds **one** first-five success in the intended meaning-plus-keyword mod
 
 The assistant judged 413 distinct E5 first-five question–book pairs across the two modes. **222** pairs had the same question and book in the earlier E5 small assistant review and kept that judgment. The assistant inspected the other **191** pairs using the displayed title, language, subjects, description, and, for borderline fits, linked publisher or institutional pages. Eight of those newly inspected pairs had a clearly supported full fit. A `0` means the available evidence did not establish the full reading need; it does not assert that the book is useless. No human reviewer graded these results.
 
+The eight newly supported fits are:
+
+| Question | Book | Why it fits |
+| --- | --- | --- |
+| `student-06` | [*The Ethics of AI*](https://directory.doabooks.org/handle/20.500.12854/160641) | Accessible discussion of AI power, bias, and unequal treatment. |
+| `student-19` | [*Translanguaging for Equal Opportunities*](https://uplopen.com/en/books/e/10.1515/9783110769609) | Teacher-led classroom examples that treat home languages as assets. |
+| `student-19` | [*Codeswitching in the Classroom*](https://directory.doabooks.org/handle/20.500.12854/121189) | Bilingual teaching practices and classroom learning cases. |
+| `student-28` | [*Navigating Pandemic Phases*](https://nordicom.gu.se/en/publications/navigating-pandemic-phases) | A public-health communication case with a chapter on building vaccine trust. |
+| `student-32` | [*Trastornos de aprendizaje*](https://editorial.inudi.edu.pe/plus/index.php/libro/trastornos-de-aprendizaje-guia-integral-para-la-evaluacion-intervencion-y-apoyo-educativo-9) | Spanish-language reading-difficulty interventions with cases and evidence. |
+| `student-34` | [*Archival Silences*](https://www.routledge.com/Archival-Silences-Missing-Lost-and-Uncreated-Archives/Moss-Thomas/p/book/9781003003618) | Methods for reading archival gaps and a Caribbean archival-memory chapter. |
+| `student-39` | [*Groupwork with Refugees and Survivors of Human Rights Abuses*](https://www.routledge.com/Groupwork-with-Refugees-and-Survivors-of-Human-Rights-Abuses/Boyles-Ewart-Biggs-Horn-Lamb/p/book/9781032043883) | Applied, culturally relevant group practice with refugee survivors. |
+| `student-47` | [*Indigenous Data Sovereignty*](https://directory.doabooks.org/handle/20.500.12854/36695) | Indigenous rights to collection, ownership, and use of research data. |
+
 The `rank_score` in `runs.csv` is a relative ordering number from our search algorithm, **not a calibrated confidence or probability** that a book fits. A future UI should not display it as a percent without separate calibration and human validation.
 
 Compared question by question, E5 base hybrid newly succeeds on the affordable-housing question with [*Cities and Affordable Housing*](https://directory.doabooks.org/handle/20.500.12854/71469) and the Caribbean archives question with [*Archival Silences*](https://www.routledge.com/Archival-Silences-Missing-Lost-and-Uncreated-Archives/Moss-Thomas/p/book/9781003003618). It loses the previous ocean-plastics success because the suitable book moved outside its first five. E5 base meaning-only search finds a relevant [Spanish special-education guide](https://editorial.inudi.edu.pe/plus/index.php/libro/trastornos-de-aprendizaje-guia-integral-para-la-evaluacion-intervencion-y-apoyo-educativo-9) and a [public-health communication case](https://nordicom.gu.se/en/publications/navigating-pandemic-phases), but the current keyword fusion does not place either within its first five. This shows that ranking logic can still hide useful meaning-search results.
