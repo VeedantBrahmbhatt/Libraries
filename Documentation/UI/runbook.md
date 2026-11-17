@@ -12,11 +12,11 @@ The 1,884 records are the union of saved top-ten result pools from the prior 50-
 2. Install Node 20 or later and run `npm ci --prefix frontend` from the repository root.
 3. Run `npm test --prefix frontend` and `npm run build --prefix frontend`.
 4. Run `npm run dev --prefix frontend` and open the localhost URL that Vite prints.
-5. Write a full-sentence request, leave **Best evaluated · GTE hybrid** selected, and select **Find books**.
+5. Write a full-sentence request, leave **Best evaluated · GTE base** and **Meaning + keywords** selected, and select **Find books**.
 6. The first query downloads the GTE model; later queries reuse its browser cache. Switch to E5 small or E5 base to compare them.
 7. Read five results; select **More options** for up to ten. Open a source link to inspect a book record.
 
-The approximate first-use model downloads are E5 small 118 MB, E5 base 278 MB, and GTE base 340 MB. Browser cache behavior varies. Wait for the loading message before assuming the search has failed. A stable internet connection is required for the initial model download. Voice entry appears only where the browser supports its speech API.
+The approximate first-use model downloads are E5 small 118 MB, E5 base 278 MB, and GTE base 340 MB. Browser cache behavior varies. Wait for the loading message before assuming the search has failed. A stable internet connection is required for the initial model download. The displayed relative score uses the ranking formula with the top result set to 100; it is not a confidence percentage or comparable across queries. Voice entry appears only where the browser supports its speech API.
 
 ## Meeting demo
 

@@ -113,9 +113,9 @@ function renderCard(hit: SearchHit): HTMLElement {
   side.className = 'book-side';
   const relevance = document.createElement('div');
   relevance.className = 'relevance';
-  relevance.textContent = hit.relevance.toFixed(4);
+  relevance.textContent = String(Math.round(100 * hit.relevance / currentHits[0].relevance));
   const scoreLabel = document.createElement('small');
-  scoreLabel.textContent = 'RELATIVE RELEVANCE';
+  scoreLabel.textContent = 'RELATIVE SCORE';
   relevance.append(scoreLabel);
   const link = document.createElement('a');
   link.className = 'book-link';
@@ -131,7 +131,7 @@ function renderCard(hit: SearchHit): HTMLElement {
 function renderHits(): void {
   list.replaceChildren(...currentHits.slice(0, visibleCount).map(renderCard));
   more.hidden = currentHits.length <= visibleCount;
-  subtitle.textContent = `Showing ${Math.min(visibleCount, currentHits.length)} of ${currentHits.length} results from ${catalog?.books.length.toLocaleString() ?? 'the'} demo books.`;
+  subtitle.textContent = `Showing ${Math.min(visibleCount, currentHits.length)} of ${currentHits.length} results from ${catalog?.books.length.toLocaleString() ?? 'the'} demo books. Top relative score = 100; these are not confidence percentages.`;
   if (!currentHits.length) setStatus('No books in this sample matched. Try a broader request.', false);
 }
 
