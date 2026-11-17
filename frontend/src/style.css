@@ -94,6 +94,8 @@ h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-size: clamp
 .results-model { color: var(--deep-violet); background: var(--lavender); padding: 9px 12px; border-radius: 999px; font-size: 12px; font-weight: 750; white-space: nowrap; }
 .status { border-radius: 11px; padding: 15px 18px; background: #f2ebf7; border: 1px solid #e3d6ed; color: var(--deep-violet); font-size: 14px; margin-bottom: 20px; }
 .status.error { color: #8c1b32; background: #fff0f2; border-color: #efc7ce; }
+.fallback-button { display: block; margin-top: 11px; border: 1px solid #8c1b32; border-radius: 7px; padding: 8px 11px; color: #8c1b32; background: #fff; font: inherit; font-weight: 700; cursor: pointer; }
+.fallback-button:hover { background: #ffe4e9; }
 .results-list { display: grid; gap: 14px; }
 .book-card { background: #fff; border: 1px solid #e9e4ed; border-radius: 14px; padding: 23px 25px; display: grid; grid-template-columns: 70px minmax(0,1fr) auto; gap: 22px; align-items: start; transition: box-shadow .18s ease, border-color .18s ease; }
 .book-card:hover { border-color: #d3bfdf; box-shadow: 0 9px 26px rgba(47, 21, 65, .06); }

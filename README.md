@@ -36,7 +36,7 @@ The current phase adds a free public browser demo. It can search **1,884 selecte
 
 ### Browser demo
 
-The [UI runbook](Documentation/UI/runbook.md) covers the public link, model selection, first-use download sizes, local preview, and deployment. In the repository, run `npm ci --prefix frontend`, `npm test --prefix frontend`, then `npm run dev --prefix frontend`. The public site runs the query model and ranking in the visitor's browser; GitHub Pages hosts only static files. Results show five books first and up to ten after “More options.” The displayed number sets the top book to 100 within that search; it is **not a confidence probability**. The demo has no student login or stored profile.
+The [UI runbook](Documentation/UI/runbook.md) covers the public link, model selection, first-use download sizes, local preview, and deployment. In the repository, run `npm ci --prefix frontend`, `npm test --prefix frontend`, then `npm run dev --prefix frontend`. The public site runs the query model and ranking in the visitor's browser; GitHub Pages hosts only static files. Results show five books first and up to ten after “More options.” If a model download fails, an explicitly labeled keyword-only preview is available. The displayed number sets the top book to 100 within that search; it is **not a confidence probability**. The demo has no student login or stored profile.
 
 See [the data preparation runbook](Documentation/Data-Preparation/runbook.md) for exact setup, commands, publishing steps, and troubleshooting. The GitHub Actions workflow is the intended way to publish: it uses the `HF_TOKEN` repository secret and temporary runner storage. It runs after data-preparation changes reach `main`, and can also be started manually.
 

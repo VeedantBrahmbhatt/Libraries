@@ -110,3 +110,19 @@ export function rankBooks(
   }
   return hits;
 }
+
+export function rankKeywordBooks(query: string, index: SearchIndex): SearchHit[] {
+  if (!query.trim()) throw new Error('Enter a question to search.');
+  const seenTitles = new Set<string>();
+  const hits: SearchHit[] = [];
+  for (const [rank, position] of keywordOrder(query, index).entries()) {
+    const book = index.books[position];
+    const titleKey = book.title.normalize('NFKD').toLowerCase().replace(/\s+/g, ' ').trim();
+    if (seenTitles.has(titleKey)) continue;
+    seenTitles.add(titleKey);
+    hits.push({ book, rank: hits.length + 1, relevance: 1 / (RRF_OFFSET + rank + 1),
+      semanticSimilarity: 0 });
+    if (hits.length === 10) break;
+  }
+  return hits;
+}

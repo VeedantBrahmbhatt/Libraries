@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildSearchIndex, rankBooks, tokens } from './search';
+import { buildSearchIndex, rankBooks, rankKeywordBooks, tokens } from './search';
 import type { Book } from './types';
 
 function book(id: string, title: string, description: string): Book {
@@ -36,5 +36,12 @@ describe('browser ranking', () => {
     expect(hits.map(hit => hit.book.id)).toEqual(['a', 'c']);
     expect(() => rankBooks('query', new Float32Array([1]), new Float32Array(2), index,
       'semantic')).toThrow('different dimensions');
+  });
+
+  it('offers a clearly separate keyword preview when a model cannot load', () => {
+    const index = buildSearchIndex([book('a', 'Ocean science', 'marine biology'),
+      book('b', 'AI for business', 'A guide for managers')]);
+    expect(rankKeywordBooks('I study business and need AI without coding', index)
+      .map(hit => hit.book.id)).toEqual(['b']);
   });
 });

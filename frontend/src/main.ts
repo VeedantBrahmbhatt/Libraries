@@ -1,7 +1,7 @@
 import './style.css';
 import { loadCatalog, loadVectors } from './catalog';
 import { DEFAULT_MODEL, MODELS } from './model-config';
-import { buildSearchIndex, rankBooks } from './search';
+import { buildSearchIndex, rankBooks, rankKeywordBooks } from './search';
 import type { Catalog } from './catalog';
 import type { ModelKey, SearchHit, SearchMode } from './types';
 
@@ -177,10 +177,25 @@ async function search(): Promise<void> {
     history.replaceState(null, '', url);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Search could not finish.';
-    const guidance = /network error|failed to fetch/i.test(message)
+    const downloadInterrupted = /network error|failed to fetch/i.test(message);
+    const guidance = downloadInterrupted
       ? 'A download was interrupted. Check your connection, then try again.'
       : `Search could not finish: ${message} Try again or choose another model.`;
     setStatus(guidance, true);
+    if (downloadInterrupted && searchIndex) {
+      const preview = document.createElement('button');
+      preview.type = 'button';
+      preview.className = 'fallback-button';
+      preview.textContent = 'Show keyword-only preview';
+      preview.addEventListener('click', () => {
+        currentHits = rankKeywordBooks(text, searchIndex!);
+        visibleCount = 5;
+        modelLabel.textContent = 'Keyword-only preview · model unavailable';
+        setStatus('');
+        renderHits();
+      });
+      status.append(preview);
+    }
   } finally {
     setBusy(false);
   }

@@ -10,5 +10,6 @@
 6. Added a GitHub Pages Actions deployment workflow, local and meeting runbook, README updates, and handover notes.
 7. Enabled GitHub Pages with a workflow source and allowed the purpose branch in the `github-pages` environment. The [latest deployment run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/44081815805) passed with five frontend tests and a production build. The dependency update's [first successful run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/44074832303) reported zero npm vulnerabilities after updating Transformers.js and Vitest.
 8. Opened the public page and verified that the 1,884-book badge appears; the hosted catalog hash matches the committed manifest. A first E5 small search in the Codex in-app browser could not finish because its large model download returned a network error. Regular-browser end-to-end search remains to be checked before a stakeholder meeting.
+9. Added an explicitly labeled keyword-only fallback for interrupted model downloads so the interface can still show real sample books without pretending that semantic inference succeeded.
 
 The browser sample is deliberately limited and drawn from prior evaluation outputs. It must not be used as a new KPI test. No full-corpus source or full index is stored in this branch.
