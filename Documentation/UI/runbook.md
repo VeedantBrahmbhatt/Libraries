@@ -20,10 +20,14 @@ The approximate first-use model downloads are E5 small 118 MB, E5 base 278 MB, a
 
 ## Meeting demo
 
-Open `https://veedantbrahmbhatt.github.io/Libraries/` on a laptop with a current Chrome or Edge browser and stable internet. Run one query before the meeting so the default model is cached. Explain that the first five results and their summaries come from metadata, the score is relative within a search, and the 1,884-book sample is a limited prototype. Enter a new natural-language question live; the examples are optional. Compare models only if the meeting connection can handle their separate first-use downloads. The UI has no real student login, profile storage, or NYU catalog access.
+Open `https://veedantbrahmbhatt.github.io/Libraries/` on a laptop with a current Chrome or Edge browser and stable internet. **Before the meeting, complete one actual query in that same browser** so the default model is cached; a loaded page alone does not prove inference is ready. Explain that the first five results and their summaries come from metadata, the score is relative within a search, and the 1,884-book sample is a limited prototype. Enter a new natural-language question live; the examples are optional. Compare models only if the meeting connection can handle their separate first-use downloads. The UI has no real student login, profile storage, or NYU catalog access.
 
 ## Publish and maintain
 
 The `deploy-demo-pages.yml` workflow builds and tests `frontend/` from the purpose branch, then publishes `frontend/dist` to GitHub Pages. The branch's `frontend/public/data/` contains only the small, checked sample. `build-browser-demo-sample.yml` regenerates the sample on a temporary GitHub runner from pinned source/index revisions and saved result pools. `publish-browser-demo-sample.yml` verified and committed the sample once; its source artifact expires, so future regeneration should use a fresh build run and update its artifact run ID. Do not commit the 91,667-book Parquet source, full search index, model weights, `HF_TOKEN`, or local caches.
 
 Update this runbook and the root README when the sample, models, ranking, hosting, or user flow changes. Check [the evaluation reports](../Evaluation/embedding-model-comparison-results.md) before making claims about search quality. The 40/50 target remains unmet and human review is pending.
+
+## Verification on 2026-11-17
+
+The [Pages deployment](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/44074832303) passed frontend tests and the production build; `npm ci` reported zero known vulnerabilities. The public page and its 1,884-book catalog load, and the hosted catalog hash matches the committed manifest. The Codex in-app browser interrupted the large Hugging Face model download with a network error, so an end-to-end live query in a regular browser is still an explicit pre-meeting check. Do not describe the demo as fully query-verified until that check succeeds.

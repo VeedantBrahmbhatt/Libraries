@@ -161,6 +161,7 @@ async function search(): Promise<void> {
   results.scrollIntoView({ behavior: 'smooth', block: 'start' });
   try {
     catalog ??= await loadCatalog();
+    badge.textContent = `${catalog.books.length.toLocaleString()} open-access demo books`;
     searchIndex ??= buildSearchIndex(catalog.books);
     const [vector, bookVectors] = await Promise.all([
       embed(text, model), loadVectors(model, catalog),
@@ -176,7 +177,10 @@ async function search(): Promise<void> {
     history.replaceState(null, '', url);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Search could not finish.';
-    setStatus(`Search could not finish: ${message} Try again or choose another model.`, true);
+    const guidance = /network error|failed to fetch/i.test(message)
+      ? 'A download was interrupted. Check your connection, then try again.'
+      : `Search could not finish: ${message} Try again or choose another model.`;
+    setStatus(guidance, true);
   } finally {
     setBusy(false);
   }
@@ -236,7 +240,7 @@ if (speech) {
 void loadCatalog().then(loaded => {
   catalog = loaded;
   badge.textContent = `${loaded.books.length.toLocaleString()} open-access demo books`;
-}).catch(() => { badge.textContent = 'Book sample unavailable'; });
+}).catch(() => { badge.textContent = 'Book sample unavailable · Search to retry'; });
 
 const params = new URLSearchParams(window.location.search);
 const initialQuery = params.get('q');
