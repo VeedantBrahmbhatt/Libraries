@@ -1,41 +1,47 @@
 # E5 base and GTE comparison results
 
-## Status and evidence
+## Decision
 
-E5 base is complete. GTE is still building its full-catalog vectors in the [recovery run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43896334769); no GTE relevance score exists yet. The complete E5 encode shards came from [run 43848201040](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43848201040), and the independent E5 search artifact is [artifact 14239726079](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43896334769/artifacts/14239726079). The committed [manifest](../../evaluation/model-comparison/e5-base/manifest.json) pins the exact model, 50 questions, v2 book database, vector and ranking checksums. The compact [ranked results](../../evaluation/model-comparison/e5-base/runs.csv), [assistant labels](../../evaluation/model-comparison/e5-base-labels.csv), and [computed metrics](../../evaluation/model-comparison/e5-base-metrics.json) reproduce the E5 numbers below. The full model and index remain only on temporary cloud runners.
+Neither larger model meets the requested search-quality bar. On the same 50 authored student questions and 91,667 DOAB books, the current E5 small hybrid search found a clearly suitable book in the first five for **17/50** questions, E5 base hybrid for **18/50**, and GTE hybrid for **19/50**. GTE's two-question improvement over the current model is too small to justify replacing the published index. Keep E5 small as the existing baseline while improving source coverage and book descriptions, then retest with human judgments and natural student questions. GTE meaning-only search is worth retaining as a development candidate, because its first-result performance is better than GTE hybrid's, but this trial does not establish a production winner.
 
-## E5 base versus the current E5 small model
+The target of at least **40/50** is **21 questions away** from the best observed result; a target strictly above 40/50 is 22 questions away. These are assistant-reviewed development numbers, not a measure of real student satisfaction or a calibrated confidence score.
 
-| Search mode | E5 small suitable searches in first five | E5 base suitable searches in first five | E5 base suitable first result | E5 base suitable book slots in first five | E5 base warm p95 |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Meaning only | 14/50 | **18/50** | 8/50 | 10.8% | 125 ms |
-| Meaning plus keyword | 17/50 | **18/50** | 12/50 | 11.2% | 199 ms |
+## Controlled comparison
 
-E5 base adds **one** first-five success in the intended meaning-plus-keyword mode. It remains **22 searches short** of the 40/50 target and **23 short** of a strictly above-40 target. The 95th-percentile timing is a warm GitHub runner measurement, excluding model startup, downloading, network, and the future UI. It is not a deployment response-time promise.
+Both candidate models used the same pinned v2 DOAB keyword database, 50 queries, 512-token limit, full 91,667-book catalog, and project-owned search/ranking code. The encoder and its required text-prefix convention differed between models. The existing E5 small figures come from the [earlier v2 assistant review](assistant-v2-results.md), which used the same questions and catalog, though it was a separate run. Full model weights and vectors stayed on temporary GitHub runners; this repository retains only the first ten results per question/mode, model/source checksums, labels, and scores.
 
-The assistant judged 413 distinct E5 first-five question–book pairs across the two modes. **222** pairs had the same question and book in the earlier E5 small assistant review and kept that judgment. The assistant inspected the other **191** pairs using the displayed title, language, subjects, description, and, for borderline fits, linked publisher or institutional pages. Eight of those newly inspected pairs had a clearly supported full fit. A `0` means the available evidence did not establish the full reading need; it does not assert that the book is useless. No human reviewer graded these results.
+| Model and search mode | Questions with a clear fit in first five | Clear fit first | Clearly fitting book slots in first five | Warm p95 on runner |
+| --- | ---: | ---: | ---: | ---: |
+| Current E5 small, meaning only | 14/50 | 8/50 | 8.8% | 27 ms |
+| Current E5 small, meaning + keyword | 17/50 | 8/50 | 10.0% | 152 ms |
+| E5 base, meaning only | 18/50 | 8/50 | 10.8% | 125 ms |
+| E5 base, meaning + keyword | 18/50 | 12/50 | 11.2% | 199 ms |
+| GTE base, meaning only | **19/50** | **12/50** | **12.0%** | 156 ms |
+| GTE base, meaning + keyword | **19/50** | 11/50 | 11.6% | 200 ms |
 
-The eight newly supported fits are:
+These times exclude model startup, downloads, network, and a future UI. They are not a deployed response-time guarantee. A `rank_score` in the saved CSV orders books within that run; it is not a probability that the book is useful.
 
-| Question | Book | Why it fits |
-| --- | --- | --- |
-| `student-06` | [*The Ethics of AI*](https://directory.doabooks.org/handle/20.500.12854/160641) | Accessible discussion of AI power, bias, and unequal treatment. |
-| `student-19` | [*Translanguaging for Equal Opportunities*](https://uplopen.com/en/books/e/10.1515/9783110769609) | Teacher-led classroom examples that treat home languages as assets. |
-| `student-19` | [*Codeswitching in the Classroom*](https://directory.doabooks.org/handle/20.500.12854/121189) | Bilingual teaching practices and classroom learning cases. |
-| `student-28` | [*Navigating Pandemic Phases*](https://nordicom.gu.se/en/publications/navigating-pandemic-phases) | A public-health communication case with a chapter on building vaccine trust. |
-| `student-32` | [*Trastornos de aprendizaje*](https://editorial.inudi.edu.pe/plus/index.php/libro/trastornos-de-aprendizaje-guia-integral-para-la-evaluacion-intervencion-y-apoyo-educativo-9) | Spanish-language reading-difficulty interventions with cases and evidence. |
-| `student-34` | [*Archival Silences*](https://www.routledge.com/Archival-Silences-Missing-Lost-and-Uncreated-Archives/Moss-Thomas/p/book/9781003003618) | Methods for reading archival gaps and a Caribbean archival-memory chapter. |
-| `student-39` | [*Groupwork with Refugees and Survivors of Human Rights Abuses*](https://www.routledge.com/Groupwork-with-Refugees-and-Survivors-of-Human-Rights-Abuses/Boyles-Ewart-Biggs-Horn-Lamb/p/book/9781032043883) | Applied, culturally relevant group practice with refugee survivors. |
-| `student-47` | [*Indigenous Data Sovereignty*](https://directory.doabooks.org/handle/20.500.12854/36695) | Indigenous rights to collection, ownership, and use of research data. |
+## What changed in the results
 
-The `rank_score` in `runs.csv` is a relative ordering number from our search algorithm, **not a calibrated confidence or probability** that a book fits. A future UI should not display it as a percent without separate calibration and human validation.
+GTE hybrid succeeds for two questions where E5 base hybrid fails: ocean plastic pollution and a Spanish request for research-based reading interventions. E5 base hybrid succeeds where GTE hybrid fails on one Caribbean colonial-archives question. They share the other 17 successful hybrid questions. GTE meaning-only succeeds on ocean plastics, local outbreak communication, an accessible quantum-computing introduction, and corporate sustainability decisions where E5 base meaning-only fails. E5 base meaning-only succeeds where GTE fails on streaming and film production, vaccine-trust communication, and assistive-robot evaluation.
 
-Compared question by question, E5 base hybrid newly succeeds on the affordable-housing question with [*Cities and Affordable Housing*](https://directory.doabooks.org/handle/20.500.12854/71469) and the Caribbean archives question with [*Archival Silences*](https://www.routledge.com/Archival-Silences-Missing-Lost-and-Uncreated-Archives/Moss-Thomas/p/book/9781003003618). It loses the previous ocean-plastics success because the suitable book moved to rank seven. E5 base meaning-only search finds a relevant [Spanish special-education guide](https://editorial.inudi.edu.pe/plus/index.php/libro/trastornos-de-aprendizaje-guia-integral-para-la-evaluacion-intervencion-y-apoyo-educativo-9) at rank two and a [public-health communication case](https://nordicom.gu.se/en/publications/navigating-pandemic-phases) at rank one, but the current keyword fusion places neither in its first ten. This shows that ranking logic can still hide useful meaning-search results.
+GTE meaning-only found [*Learning from Experience*](https://www.rand.org/content/dam/rand/pubs/technical_reports/2005/RAND_TR285.pdf) for the local public-health question and [*A Guide to Sustainable Corporate Responsibility*](https://directory.doabooks.org/handle/20.500.12854/77331) for the MBA sustainability question, but GTE hybrid omitted both from its first five. E5 base has a similar fusion loss for Spanish reading interventions and vaccine-trust communication. These examples support testing the ranking logic separately, but the hindsight union of GTE's two modes covers only **21/50** questions. That union is a diagnostic ceiling on the reviewed result lists, not an implemented algorithm; search cannot know the answer labels in advance.
 
-E5 base hybrid succeeds on 17/40 English, 1/2 German, 0/4 Spanish, and 0/4 French questions. Those language groups are tiny. The 50 questions were written by us for fictional personas and are all development cases; they are not natural student searches or an independent acceptance test. This comparison caps both trial models at 512 tokens, so it does not assess GTE's longer-context potential.
+GTE hybrid successes by query language were 17/40 English, 1/2 German, 1/4 Spanish, and 0/4 French. E5 base hybrid had 17/40, 1/2, 0/4, and 0/4 respectively. The non-English groups are too small for a reliable language ranking. The French misses remain a clear problem to investigate.
 
-With hindsight, taking a suitable first-five book from either E5 base mode would cover **20/50** questions. That is a diagnostic ceiling for these two already reviewed result lists, not a working ranking method: the system does not know a book is suitable at search time. It also remains far below the requested bar, so ranking changes alone on these result lists cannot close the gap.
+## Review and traceability
 
-## Decision pending GTE
+The [recovery cloud run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43896334769) completed all eight GTE vector shards and both full-catalog evaluations. The E5 trial used the four completed E5 shards from [run 43848201040](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43848201040). Its compact result is [artifact 14239726079](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43896334769/artifacts/14239726079); GTE's is [artifact 14258321947](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43896334769/artifacts/14258321947). The committed manifests and CSV checksums reproduce both reports without downloading the full catalog.
 
-Do not promote E5 base based on a one-question gain. Finish the same frozen evaluation for GTE, compare first-five and first-result success, inspect per-question wins and losses, and then decide whether model size or ranking/data changes offer the better next step.
+For E5 base, 222 of 413 distinct first-five question–book pairs kept an earlier identical-pair assistant judgment and 191 were inspected anew. For GTE, 189 of 415 pairs kept the earlier v2 judgment, 35 kept the E5 base judgment for the identical question and book, and 191 were newly inspected. GTE's three newly supported full fits were [*Marine Plastics Abatement*](https://iwaponline.com/ebooks/book/868/Marine-Plastics-AbatementChallenges-Implications) for readable ocean-plastics sources and solutions, [*Learning from Experience*](https://www.rand.org/content/dam/rand/pubs/technical_reports/2005/RAND_TR285.pdf) for local outbreak-response cases, and [*Neuropsicología Educativa, Narrativa y Proceso Lector*](https://libros.usc.edu.co/index.php/usc/es/catalog/book/575) for a Spanish research-based reading intervention with case evidence. The last is small case-study evidence, not proof that the intervention works broadly.
+
+The [E5 manifest and rankings](../../evaluation/model-comparison/e5-base/), [GTE manifest and rankings](../../evaluation/model-comparison/gte-base/), [assistant labels and computed scores](../../evaluation/model-comparison/README.md), and [scoring runbook](embedding-model-comparison-runbook.md) preserve the details. A `0` label means that the available title, metadata preview, and any checked source page did not establish the *whole* reading need; it is not a claim that the book has no value. No human reviewer has graded these model outputs. All 50 questions were authored for fictional personas and are development cases; there is no natural-question holdout. Neither model was trained on these questions.
+
+## Next quality work
+
+1. Audit missed questions against the full catalog to distinguish missing books, thin descriptions, language mismatches, and ranking failures.
+2. Improve or add permitted book metadata and a vetted beginner-textbook source, then build a new versioned index in the cloud.
+3. Test a ranking change that protects useful meaning-only books from being buried by keyword fusion; score it on a frozen, human-graded candidate pool.
+4. Collect anonymous natural student questions in the intended languages, set aside a holdout, and require human Success@5 of at least 40/50 before claiming the prototype meets the bar.
+
+Do not display the current rank numbers as confidence percentages, or present this model comparison as a passing acceptance test.
