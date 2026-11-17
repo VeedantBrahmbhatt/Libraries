@@ -3,8 +3,8 @@
   "books": 1884,
   "files": {
     "catalog.json": {
-      "bytes": 2155172,
-      "sha256": "85c814752ce75e5c4f625123fba1cd2aca5d8d83c4040f893702004793c7ad22"
+      "bytes": 2154910,
+      "sha256": "f4609be124611659fe6a6a5424642612ab4cf6a4a04b52161cc0c256694cfed4"
     },
     "e5-base.f16": {
       "bytes": 2893824,

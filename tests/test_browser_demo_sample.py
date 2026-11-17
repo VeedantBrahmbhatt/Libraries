@@ -62,3 +62,10 @@ def test_write_half_vectors_keeps_selected_order_and_rejects_bad_input(tmp_path)
     ]
     with pytest.raises(ValueError, match="not normalized"):
         sample.write_half_vectors(np.array([[3, 4]], dtype=np.float32), [0], target)
+
+
+def test_clean_description_rejects_export_placeholders():
+    assert sample.clean_description("  undefined  ") == ""
+    assert sample.clean_description("NaN") == ""
+    assert sample.clean_description(None) == ""
+    assert sample.clean_description("A real\n summary") == "A real summary"

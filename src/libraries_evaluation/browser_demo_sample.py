@@ -30,6 +30,15 @@ from libraries_search.source import download_source, sha256_file
 
 EXPECTED_BOOKS = 1_884
 QUERY_COUNT = 50
+MISSING_DESCRIPTIONS = {"", "undefined", "null", "none", "nan", "n/a"}
+
+
+def clean_description(value: object) -> str:
+    """Treat placeholder metadata as missing instead of publishing it as prose."""
+    if not isinstance(value, str):
+        return ""
+    cleaned = " ".join(value.split())
+    return "" if cleaned.casefold() in MISSING_DESCRIPTIONS else cleaned
 
 
 def _read_csv(data: bytes) -> list[dict[str, str]]:
@@ -80,9 +89,8 @@ def selected_source_rows(parquet_path: Path, ids: set[str]) -> tuple[list[int], 
         for book in batch.to_pylist():
             if book["book_id"] in ids:
                 positions.append(row_number)
-                description = (
-                    book.get("abstract") or book.get("other_language_abstract") or ""
-                ).strip()
+                description = (clean_description(book.get("abstract"))
+                               or clean_description(book.get("other_language_abstract")))
                 books.append({
                     "id": book["book_id"], "title": book["title"],
                     "authors": book.get("authors") or [],

@@ -6,6 +6,8 @@ Libraries is an independent, NYU-inspired prototype for discovering open-access 
 
 The current phase adds a free public browser demo. It can search **1,884 selected open-access books** with natural-language questions, three multilingual models, and an owned hybrid ranking. The default is GTE base with meaning plus keywords because it led the previous assistant-judged model comparison at **19/50** first-five fits; that result was on the **full 91,667-book index**, not the browser sample. It remains below the **40/50** goal and has not been human validated. The sample was drawn from prior top-ten result pools, so it is **not a representative subset** and must not be used to claim the earlier KPI or a new quality score. The [UI runbook](Documentation/UI/runbook.md) gives demo and development steps. The underlying catalog comes from DOAB's [repository metadata export](https://www.doabooks.org/en/researchers/full-faq) and is shared through [Tox1/LibrariesBookData](https://huggingface.co/datasets/Tox1/LibrariesBookData). DOAB metadata is CC0; individual books have their own licenses. No full DOAB dataset is committed here.
 
+A live E5 small query has shown that the site can return ranked cards, but its small sample can miss a requested topic. In particular, `chinese culture` produced broad China-related results with weak fit. The browser demo now removes source placeholders such as `undefined` from summaries and omits books without a usable description. Treat the page as a working interface prototype, not a proven recommendation-quality demo.
+
 ## Repository guide
 
 | Path | Purpose |

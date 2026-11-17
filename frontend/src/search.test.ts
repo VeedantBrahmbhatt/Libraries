@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { buildSearchIndex, rankBooks, rankKeywordBooks, tokens } from './search';
 import type { Book } from './types';
+import { cleanDescription } from './book-text';
 
 function book(id: string, title: string, description: string): Book {
   return { id, title, description, authors: [], subjects: [], languages: ['en'], year: 2024,
@@ -28,8 +29,9 @@ describe('browser ranking', () => {
   });
 
   it('shows only one copy of a repeated title and rejects mismatched vectors', () => {
-    const books = [book('a', 'Repeated title', ''), book('b', 'Repeated title', ''),
-      book('c', 'Different title', '')];
+    const books = [book('a', 'Repeated title', 'A useful first edition.'),
+      book('b', 'Repeated title', 'A useful second edition.'),
+      book('c', 'Different title', 'Another useful text.')];
     const index = buildSearchIndex(books);
     const hits = rankBooks('repeated title', new Float32Array([1, 0]),
       new Float32Array([1, 0, 0.9, 0.1, 0, 1]), index, 'semantic');
@@ -43,5 +45,17 @@ describe('browser ranking', () => {
       book('b', 'AI for business', 'A guide for managers')]);
     expect(rankKeywordBooks('I study business and need AI without coding', index)
       .map(hit => hit.book.id)).toEqual(['b']);
+  });
+
+  it('removes source placeholder descriptions from displayed recommendations', () => {
+    expect(cleanDescription('  undefined  ')).toBe('');
+    expect(cleanDescription('A real summary')).toBe('A real summary');
+    const books = [book('a', 'Chinese Romanization Self-Study Guide', 'undefined'),
+      book('b', 'Chinese history', 'A book about the history of China.')];
+    const index = buildSearchIndex(books);
+    const semantic = rankBooks('chinese culture', new Float32Array([1, 0]),
+      new Float32Array([1, 0, 0.9, 0.1]), index, 'semantic');
+    expect(semantic.map(hit => hit.book.id)).toEqual(['b']);
+    expect(rankKeywordBooks('chinese culture', index).map(hit => hit.book.id)).toEqual(['b']);
   });
 });

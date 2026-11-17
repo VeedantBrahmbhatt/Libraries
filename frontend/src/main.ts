@@ -4,6 +4,7 @@ import { DEFAULT_MODEL, MODELS } from './model-config';
 import { buildSearchIndex, rankBooks, rankKeywordBooks } from './search';
 import type { Catalog } from './catalog';
 import type { ModelKey, SearchHit, SearchMode } from './types';
+import { cleanDescription } from './book-text';
 
 function byId<T extends HTMLElement>(id: string): T {
   const element = document.getElementById(id);
@@ -72,7 +73,7 @@ function embed(text: string, model: ModelKey): Promise<Float32Array> {
 }
 
 function displaySummary(description: string): string {
-  const clean = description.replace(/\s+/g, ' ').trim();
+  const clean = cleanDescription(description);
   if (!clean) return 'The publisher has not supplied a description for this book.';
   if (clean.length <= 320) return clean;
   const excerpt = clean.slice(0, 320);

@@ -1,4 +1,5 @@
 import type { Book, ModelKey, SampleManifest } from './types';
+import { cleanDescription } from './book-text';
 
 export interface Catalog {
   books: Book[];
@@ -36,7 +37,9 @@ export function loadCatalog(): Promise<Catalog> {
         books.some(book => !book.id || !book.title || !book.url?.startsWith('https://'))) {
       throw new Error('The demonstration catalog contains invalid book records.');
     }
-    return { books, manifest };
+    return { books: books.map(book => ({
+      ...book, description: cleanDescription(book.description),
+    })), manifest };
   })().catch(error => { catalogPromise = null; throw error; });
   return catalogPromise;
 }

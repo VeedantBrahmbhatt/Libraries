@@ -6,6 +6,8 @@ The public GitHub Pages site serves a static interface, metadata for 1,884 open-
 
 The 1,884 records are the union of saved top-ten result pools from the prior 50-question E5 small, E5 base, and GTE comparisons. The source order is preserved and every file is checked against a SHA-256 manifest. Because this sample was selected from evaluated results, it is not representative of the full collection and cannot be used to verify the earlier 17/50, 18/50, or 19/50 quality figures. No book text is copied; the short excerpts come from DOAB metadata.
 
+The sample has thin coverage for topics outside those earlier questions. For example, a live Chrome search for `chinese culture` completed but returned broad China-related books because no sampled title directly addresses Chinese culture. Do not demonstrate arbitrary topics as though this sample covers the full catalog. Source placeholder summaries such as `undefined` are treated as missing and books without a usable description are omitted from recommendations.
+
 ## File map
 
 | File or folder | Purpose |
@@ -13,6 +15,7 @@ The 1,884 records are the union of saved top-ten result pools from the prior 50-
 | `frontend/index.html` | Search page structure and accessible labels |
 | `frontend/src/style.css` | NYU-inspired colors, layout, mobile rules, and focus styles |
 | `frontend/src/main.ts` | Form, model controls, loading states, result cards, and voice entry |
+| `frontend/src/book-text.ts` | Cleans missing-description placeholders before display and ranking |
 | `frontend/src/model-config.ts` | Pinned browser model revisions and query settings |
 | `frontend/src/model-worker.ts` | Loads a selected model and encodes the visitor's question |
 | `frontend/src/catalog.ts` | Fetches and verifies sample data; decodes compact vectors |
@@ -53,4 +56,4 @@ Update this runbook and the root README when the sample, models, ranking, hostin
 
 ## Verification on 2026-11-17
 
-The [latest Pages deployment](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/44081815805) passed frontend tests and the production build; the [dependency-update deployment](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/44074832303) reported zero known npm vulnerabilities. The public page and its 1,884-book catalog load, and the hosted catalog hash matches the committed manifest. The Codex in-app browser interrupted the large Hugging Face model download with a network error, so an end-to-end live query in a regular browser is still an explicit pre-meeting check. Do not describe the demo as fully query-verified until that check succeeds.
+The [fallback Pages deployment](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/44083401330) passed frontend tests and the production build; the [dependency-update deployment](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/44074832303) reported zero known npm vulnerabilities. The public page and its 1,884-book catalog load, and the hosted catalog hash matches the committed manifest. A real E5 small hybrid query completed in Chrome for `chinese culture`, showing ten ranked cards; their topic fit was weak. The Codex in-app browser separately interrupted a large Hugging Face model download, so pre-cache and check the desired model in the exact meeting browser before presenting. This verifies one functional query path, not the relevance of arbitrary results or all three models.

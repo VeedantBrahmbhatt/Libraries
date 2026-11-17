@@ -1,4 +1,5 @@
 import type { Book, SearchHit, SearchMode } from './types';
+import { cleanDescription } from './book-text';
 
 const RRF_OFFSET = 60;
 const CANDIDATES = 500;
@@ -32,7 +33,7 @@ export function buildSearchIndex(books: Book[]): SearchIndex {
   const terms = books.map(book => {
     const termWeights = new Map<string, number>();
     for (const [text, weight] of [
-      [book.title, 3], [book.subjects.join(' '), 2], [book.description, 1],
+      [book.title, 3], [book.subjects.join(' '), 2], [cleanDescription(book.description), 1],
     ] as const) {
       for (const term of tokens(text)) {
         termWeights.set(term, (termWeights.get(term) ?? 0) + weight);
@@ -102,6 +103,7 @@ export function rankBooks(
   const hits: SearchHit[] = [];
   for (const [position, relevance] of ordered) {
     const book = index.books[position];
+    if (!cleanDescription(book.description)) continue;
     const titleKey = book.title.normalize('NFKD').toLowerCase().replace(/\s+/g, ' ').trim();
     if (seenTitles.has(titleKey)) continue;
     seenTitles.add(titleKey);
@@ -117,6 +119,7 @@ export function rankKeywordBooks(query: string, index: SearchIndex): SearchHit[]
   const hits: SearchHit[] = [];
   for (const [rank, position] of keywordOrder(query, index).entries()) {
     const book = index.books[position];
+    if (!cleanDescription(book.description)) continue;
     const titleKey = book.title.normalize('NFKD').toLowerCase().replace(/\s+/g, ' ').trim();
     if (seenTitles.has(titleKey)) continue;
     seenTitles.add(titleKey);

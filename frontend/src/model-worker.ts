@@ -33,14 +33,16 @@ self.addEventListener('message', async (event: MessageEvent<EncodeRequest>) => {
       activeExtractor = null;
       activeKey = null;
       self.postMessage({ type: 'progress', id, message: `Loading ${config.label}…` });
+      let downloadNoticeSent = false;
       const loaded = await pipeline('feature-extraction', config.repo, {
         revision: config.revision,
         dtype: 'q8',
         progress_callback: (progress) => {
-          if (progress.status === 'progress' && typeof progress.progress === 'number') {
+          if (progress.status === 'progress' && !downloadNoticeSent) {
+            downloadNoticeSent = true;
             self.postMessage({
               type: 'progress', id,
-              message: `Loading ${config.label}: ${Math.round(progress.progress)}%`,
+              message: `Downloading ${config.label} model files. This may take several minutes on first use.`,
             });
           }
         },
