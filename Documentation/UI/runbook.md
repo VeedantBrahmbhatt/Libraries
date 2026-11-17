@@ -6,6 +6,27 @@ The public GitHub Pages site serves a static interface, metadata for 1,884 open-
 
 The 1,884 records are the union of saved top-ten result pools from the prior 50-question E5 small, E5 base, and GTE comparisons. The source order is preserved and every file is checked against a SHA-256 manifest. Because this sample was selected from evaluated results, it is not representative of the full collection and cannot be used to verify the earlier 17/50, 18/50, or 19/50 quality figures. No book text is copied; the short excerpts come from DOAB metadata.
 
+## File map
+
+| File or folder | Purpose |
+| --- | --- |
+| `frontend/index.html` | Search page structure and accessible labels |
+| `frontend/src/style.css` | NYU-inspired colors, layout, mobile rules, and focus styles |
+| `frontend/src/main.ts` | Form, model controls, loading states, result cards, and voice entry |
+| `frontend/src/model-config.ts` | Pinned browser model revisions and query settings |
+| `frontend/src/model-worker.ts` | Loads a selected model and encodes the visitor's question |
+| `frontend/src/catalog.ts` | Fetches and verifies sample data; decodes compact vectors |
+| `frontend/src/search.ts` | Own keyword, semantic, and hybrid ranking rules |
+| `frontend/src/types.ts` | Shared book, model, and result shapes |
+| `frontend/src/*.test.ts` | Synthetic ranking and vector-format checks |
+| `frontend/public/data/` | Small shared book catalog, model vectors, and checksum manifest |
+| `frontend/package.json`, `package-lock.json`, `tsconfig.json`, `vite.config.ts` | Pinned dependencies, TypeScript, and site build settings |
+| `src/libraries_evaluation/browser_demo_sample.py` | Cloud-only extraction from verified full indexes |
+| `tests/test_browser_demo_sample.py` | Synthetic sample-selection and provenance tests |
+| `.github/workflows/build-browser-demo-sample.yml` | Creates the compact sample on temporary GitHub storage |
+| `.github/workflows/publish-browser-demo-sample.yml` | Verifies and commits the compact sample |
+| `.github/workflows/deploy-demo-pages.yml` | Tests, builds, and publishes the site |
+
 ## Run it locally
 
 1. Clone the `build-nyu-search-demo` branch of `VeedantBrahmbhatt/Libraries`.
@@ -30,4 +51,4 @@ Update this runbook and the root README when the sample, models, ranking, hostin
 
 ## Verification on 2026-11-17
 
-The [Pages deployment](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/44074832303) passed frontend tests and the production build; `npm ci` reported zero known vulnerabilities. The public page and its 1,884-book catalog load, and the hosted catalog hash matches the committed manifest. The Codex in-app browser interrupted the large Hugging Face model download with a network error, so an end-to-end live query in a regular browser is still an explicit pre-meeting check. Do not describe the demo as fully query-verified until that check succeeds.
+The [latest Pages deployment](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/44081815805) passed frontend tests and the production build; the [dependency-update deployment](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/44074832303) reported zero known npm vulnerabilities. The public page and its 1,884-book catalog load, and the hosted catalog hash matches the committed manifest. The Codex in-app browser interrupted the large Hugging Face model download with a network error, so an end-to-end live query in a regular browser is still an explicit pre-meeting check. Do not describe the demo as fully query-verified until that check succeeds.
