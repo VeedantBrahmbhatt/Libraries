@@ -1,5 +1,9 @@
 # Project handover
 
+## Browser demo phase
+
+Purpose branch `build-nyu-search-demo` adds a responsive, independent NYU-inspired UI in `frontend/` and a pinned, checksum-verified **1,884-book** sample in `frontend/public/data/`. The [UI runbook](UI/runbook.md), [design](UI/design.md), [plan](UI/implementation-plan.md), and [session record](UI/session-log.md) explain the full flow. Browser inference uses E5 small, E5 base, or GTE base; the project ranks the sample itself with semantic scoring or reciprocal-rank fusion of semantic and keyword ranks. Default GTE hybrid follows the previous full-catalog assistant diagnostic (19/50), but the browser sample is selected from those evaluation result pools and does **not** inherit that quality score. First-use model downloads are substantial. No full catalog, full vectors, model weights, or student profiles are committed. GitHub Pages deploys the static site from the purpose branch; see the runbook for the exact meeting procedure and limitations.
+
 ## Current scope
 
 The first session prepared 91,667 DOAB book records from its direct repository export. Code is in `src/libraries_data`; test fixtures are synthetic. The [shared output](https://huggingface.co/datasets/Tox1/LibrariesBookData/commit/daba70f6e6de9f7a5c9a1f830fd255415c6d6bb7) is in `Tox1/LibrariesBookData`, and `HF_TOKEN` is stored as a GitHub Actions repository secret. The [publication run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43653263362) passed.
@@ -34,7 +38,7 @@ The ninth phase is the [E5 base and GTE controlled comparison](Evaluation/embedd
 4. Follow the [search runbook](Search/runbook.md) to query or rebuild the owned search index in a remote environment. The source dataset itself does not provide our search API or ranking.
 5. Follow the [v2 review runbook](Evaluation/human-review-v2-runbook.md) to assign and grade the 723 DOAB and 95 textbook pairs. The older [evaluation runbook](Evaluation/runbook.md) governs only the separate v1 pilot. Do not repoint the v1 collector or reuse its sheet IDs as v2 judgments. Keep assistant grades in `evaluation/ai-review/` and `evaluation/personas/` separate from human grades in `evaluation/review/`.
 6. Use the [query-fit report](Evaluation/query-fit-results.md) and [assistant v2 results](Evaluation/assistant-v2-results.md) to review the 50-query misses, v2 metadata gain, slow experimental reranker, and textbook candidates. The assistant rated the new pairs, but 17/50 hybrid and 15/50 reranked are development diagnostics, not final success rates. Collect 100–150 anonymous natural questions with a frozen holdout and create a new, separately versioned review packet.
-7. After human ratings and a held-out retest, build a five-result interface with at most ten after “More options,” grounded summaries, and source links. Verify a zero-cost interactive backend before promising a public demo link; current provider limits are in the [query-fit report](Evaluation/query-fit-results.md). GitHub Pages alone cannot run the Python models or index. Real student login and profiles remain outside this prototype's approved scope.
+7. Use the [UI runbook](UI/runbook.md) for the five-first, ten-maximum browser demo and meeting procedure. GitHub Pages serves the limited sample and runs browser models; it cannot run the full Python search server. Human ratings and a held-out retest are still needed before making quality claims. Real student login and profiles remain outside this prototype's approved scope.
 
 ## Boundaries to preserve
 

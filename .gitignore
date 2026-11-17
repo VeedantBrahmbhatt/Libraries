@@ -16,3 +16,6 @@ hf-cache/
 .env.*
 !.env.example
 .DS_Store
+node_modules/
+frontend/dist/
+!frontend/public/data/

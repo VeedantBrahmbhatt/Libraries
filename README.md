@@ -1,10 +1,10 @@
 # Libraries
 
-Libraries is an NYU-focused prototype for discovering open-access books. The repository contains **data preparation**, a project-owned **keyword and multilingual semantic search baseline**, an experimental second ranking pass, and **search-quality evaluations**. A student-facing interface is a later phase.
+Libraries is an independent, NYU-inspired prototype for discovering open-access books. The repository contains **data preparation**, project-owned **keyword and multilingual semantic search**, **search-quality evaluations**, and a **browser search demo**. It is not an official NYU Libraries service.
 
 ## Current phase
 
-The project is testing whether its own search returns books that fit a student's subject and reading needs. The [assistant review of the v2 search](Documentation/Evaluation/assistant-v2-results.md) finds a clearly suitable first-five book for **17/50** authored questions with hybrid search, below the requested **more than 40/50** goal. The [query-fit and collection-coverage report](Documentation/Evaluation/query-fit-results.md) records the preceding search changes. [Rank-blind human-review sheets](evaluation/review/query-fit-v2/README.md) are ready for the newer DOAB index and the separate textbook experiment; **all 818 pairs still need people to grade them**. The underlying catalog comes from DOAB's [repository metadata export](https://www.doabooks.org/en/researchers/full-faq) and is shared through [Tox1/LibrariesBookData](https://huggingface.co/datasets/Tox1/LibrariesBookData). DOAB metadata is CC0; individual books have their own licenses. No raw DOAB dataset is committed here.
+The current phase adds a free public browser demo. It can search **1,884 selected open-access books** with natural-language questions, three multilingual models, and an owned hybrid ranking. The default is GTE base with meaning plus keywords because it led the previous assistant-judged model comparison at **19/50** first-five fits; that result was on the **full 91,667-book index**, not the browser sample. It remains below the **40/50** goal and has not been human validated. The sample was drawn from prior top-ten result pools, so it is **not a representative subset** and must not be used to claim the earlier KPI or a new quality score. The [UI runbook](Documentation/UI/runbook.md) gives demo and development steps. The underlying catalog comes from DOAB's [repository metadata export](https://www.doabooks.org/en/researchers/full-faq) and is shared through [Tox1/LibrariesBookData](https://huggingface.co/datasets/Tox1/LibrariesBookData). DOAB metadata is CC0; individual books have their own licenses. No full DOAB dataset is committed here.
 
 ## Repository guide
 
@@ -13,6 +13,7 @@ The project is testing whether its own search returns books that fit a student's
 | `src/libraries_data/` | Data preparation and publishing commands |
 | `src/libraries_search/` | Keyword and meaning-based index building, publishing, and query ranking |
 | `src/libraries_evaluation/` | Comparable search runs, human-review pool, and judged scoring |
+| `frontend/` | Public browser demo, compact sample, model loader, owned ranking, and frontend tests |
 | `evaluation/queries/` | Authored pilot and book-derived questions; no student details |
 | `evaluation/review/pilot/` | Twelve small, shared CSV sheets for human grading of the pilot candidates |
 | `evaluation/review/query-fit-v2/` | Fifty DOAB and nineteen textbook review sheets, with pinned manifests and blank human grades |
@@ -28,9 +29,14 @@ The project is testing whether its own search returns books that fit a student's
 | `Documentation/Search/` | Search design, plan, cloud runbook, and session record |
 | `Documentation/Model/` | Model choice, pinned version, encoding method, and limits |
 | `Documentation/Evaluation/` | Evaluation design, cloud runbook, session record, and provisional targets |
+| `Documentation/UI/` | Interface design, implementation plan, demo runbook, and phase record |
 | `Documentation/HANDOVER.md` | How to continue the project |
 
 ## Run and update
+
+### Browser demo
+
+The [UI runbook](Documentation/UI/runbook.md) covers the public link, model selection, first-use download sizes, local preview, and deployment. In the repository, run `npm ci --prefix frontend`, `npm test --prefix frontend`, then `npm run dev --prefix frontend`. The public site runs the query model and ranking in the visitor's browser; GitHub Pages hosts only static files. Results show five books first and up to ten after “More options.” The displayed number is a relative rank score, **not a confidence probability**. The demo has no student login or stored profile.
 
 See [the data preparation runbook](Documentation/Data-Preparation/runbook.md) for exact setup, commands, publishing steps, and troubleshooting. The GitHub Actions workflow is the intended way to publish: it uses the `HF_TOKEN` repository secret and temporary runner storage. It runs after data-preparation changes reach `main`, and can also be started manually.
 
@@ -66,4 +72,4 @@ The [query-fit phase](Documentation/Evaluation/query-fit-results.md) audited all
 
 A [controlled E5 base and GTE comparison](Documentation/Evaluation/embedding-model-comparison-results.md) completed on purpose branch `test-multilingual-embedding-models`. On the same 91,667 books and 50 authored questions, first-five hybrid clear fits were **17/50** for current E5 small, **18/50** for E5 base, and **19/50** for GTE. The [cloud recovery run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43896334769) finished all model shards and searches. Full model files and vectors stayed on temporary runners; compact results, assistant labels, and reproducible scores are in [Git](evaluation/model-comparison/README.md). The two larger models do not meet the requested at-least-40/50 bar, so the published E5 small index remains the baseline. These are assistant judgments of authored questions, not human acceptance results.
 
-DOAB's website advertises over 111,000 books, more than this official export yielded. Treat this as an export snapshot for the prototype, not proven coverage of every live-site title. The current [review packets](evaluation/review/query-fit-v2/README.md) contain **723 DOAB pairs** and **95 separate textbook pairs**, all ungraded. Human ratings of these authored questions can guide development; an independent holdout of anonymous questions from intended users is still needed for acceptance. A shareable five-result interface follows the ranking decision. A zero-cost interactive backend has not been verified yet; [the query-fit report](Documentation/Evaluation/query-fit-results.md) records the current hosting constraints. Update this README and the relevant `Documentation/` folder after each phase.
+DOAB's website advertises over 111,000 books, more than this official export yielded. Treat this as an export snapshot for the prototype, not proven coverage of every live-site title. The current [review packets](evaluation/review/query-fit-v2/README.md) contain **723 DOAB pairs** and **95 separate textbook pairs**, all ungraded. Human ratings of these authored questions can guide development; an independent holdout of anonymous questions from intended users is still needed for acceptance. The new browser demo is a shareable interface over 1,884 selected books; it does not solve full-catalog hosting or the unmet 40/50 quality goal. Update this README and the relevant `Documentation/` folder after each phase.
