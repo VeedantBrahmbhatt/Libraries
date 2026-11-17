@@ -44,6 +44,8 @@ The approximate first-use model downloads are E5 small 118 MB, E5 base 278 MB, a
 
 If a model download is interrupted, the page offers an explicit **keyword-only preview** from the same book sample. This is a fallback for walking through the interface; it does not demonstrate semantic matching and must be described that way. Retry the chosen model when the connection is stable.
 
+The fallback was checked on the deployed page with `chinese culture`: five linked cards appeared, **More options** expanded to ten, and no card showed a placeholder summary. Its topic fit was weak, so it should not stand in for a successful semantic-search demonstration.
+
 ## Meeting demo
 
 Open `https://veedantbrahmbhatt.github.io/Libraries/` on a laptop with a current Chrome or Edge browser and stable internet. **Before the meeting, complete one actual model query in that same browser** so the default model is cached; a loaded page or the keyword-only preview does not prove semantic inference is ready. Explain that the first five results and their summaries come from metadata, the score is relative within a search, and the 1,884-book sample is a limited prototype. Enter a new natural-language question live; the examples are optional. Compare models only if the meeting connection can handle their separate first-use downloads. The UI has no real student login, profile storage, or NYU catalog access.
