@@ -6,7 +6,7 @@ import type { ModelKey } from './types';
 
 env.allowLocalModels = false;
 env.useBrowserCache = true;
-env.backends.onnx.wasm.numThreads = 1;
+if (env.backends.onnx.wasm) env.backends.onnx.wasm.numThreads = 1;
 
 type Extractor = (text: string, options: { pooling: 'mean' | 'cls'; normalize: boolean }) =>
   Promise<{ data: Float32Array; dims: number[] }>;

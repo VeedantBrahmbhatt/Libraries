@@ -245,6 +245,6 @@ if (initialQuery) {
   query.dispatchEvent(new Event('input'));
 }
 const initialModel = params.get('model');
-if (initialModel && [...modelSelect.options].some(option => option.value === initialModel)) modelSelect.value = initialModel;
+if (initialModel && Array.from(modelSelect.options).some(option => option.value === initialModel)) modelSelect.value = initialModel;
 const initialMode = params.get('mode');
 if (initialMode === 'semantic' || initialMode === 'hybrid') modeSelect.value = initialMode;
