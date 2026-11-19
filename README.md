@@ -8,7 +8,7 @@ The current phase adds a free public browser demo. It can search **1,884 selecte
 
 A live E5 small query has shown that the site can return ranked cards, but its small sample can miss a requested topic. In particular, `chinese culture` produced broad China-related results with weak fit. The browser demo now removes source placeholders such as `undefined` from summaries and omits books without a usable description. Treat the page as a working interface prototype, not a proven recommendation-quality demo.
 
-The current purpose branch adds a [public visitor feedback loop](Documentation/Feedback/design.md): per-book ratings, optional fixed reasons, and a whole-list none-fit signal. A separate [feedback service](feedback-api/README.md) saves submissions privately; the [runbook](Documentation/Feedback/runbook.md) covers release and human review. Feedback does not change search results automatically. Because there is no login, submissions are visitor reports rather than verified NYU student judgments. The service is deployed; the UI goes live when this branch's Pages workflow succeeds.
+The current purpose branch adds a [public visitor feedback loop](Documentation/Feedback/design.md): per-book ratings, optional fixed reasons, and a whole-list none-fit signal. A separate [feedback service](feedback-api/README.md) saves submissions privately; the [runbook](Documentation/Feedback/runbook.md) covers release and human review. Feedback does not change search results automatically. Because there is no login, submissions are visitor reports rather than verified NYU student judgments. The service is deployed; the UI goes live when the verified commit reaches the Pages deployment branch.
 
 ## Repository guide
 

@@ -2,7 +2,7 @@ name: Deploy book search demo to GitHub Pages
 
 on:
   push:
-    branches: [build-nyu-search-demo, add-public-feedback-loop]
+    branches: [build-nyu-search-demo]
     paths:
       - '.github/workflows/deploy-demo-pages.yml'
       - 'frontend/**'

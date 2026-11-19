@@ -13,7 +13,7 @@ Each submission stores the query, shown book IDs and positions, one rating and o
 1. If the catalog changes, run `node feedback-api/scripts/sync-catalog.mjs` and commit the generated allowlist with the new frontend manifest.
 2. Run `node --test feedback-api/test/*.test.js`, `npm test --prefix frontend`, `npm run build --prefix frontend`, `bash feedback-api/scripts/build.sh`, and `node feedback-api/scripts/validate-artifact.mjs` using Node 22 or later.
 3. Publish `feedback-api/` through the Sites source helper, save its pushed commit and archive as a Site version, and deploy it. Confirm `/health` returns 200 and a synthetic submission can be deleted.
-4. Push the purpose branch to GitHub. The Pages workflow builds with the feedback API URL and Git commit as release ID. Confirm its run succeeds and the public page shows feedback controls after a search.
+4. Push the purpose branch to GitHub, then fast-forward `build-nyu-search-demo` to that reviewed commit. The Pages workflow builds with the feedback API URL and Git commit as release ID. Confirm its run succeeds and the public page shows feedback controls after a search. The Pages environment permits its deployment branch, not arbitrary feature branches.
 5. Run the retention workflow manually once after deployment and check its status. Keep the Sites secret `RATE_PEPPER` outside Git and GitHub Actions.
 
 If the API is down, book search still works; visitors see a retry message when they try to send feedback. If the catalog checksum changes before the API is redeployed, feedback returns an error until the service is updated. Do not deploy a new catalog before its allowlist.
