@@ -6,6 +6,8 @@ Purpose branch `build-nyu-search-demo` adds a responsive, independent NYU-inspir
 
 A live Chrome E5 small search for `chinese culture` completed, but the result fit was weak because the sample lacks a directly matching title. Source placeholder descriptions have been cleaned and descriptionless books are excluded from result cards. The next UI-data improvement should replace the evaluation-derived sample with a broader, openly documented selection if arbitrary-topic stakeholder searches are required; recheck quality on questions independent of that selection.
 
+The [public feedback design](Feedback/design.md) and [build sequence](Feedback/roadmap.md) are proposals, not deployed features. The user chose submissions from any visitor, without login or profiles. Treat those ratings as low-trust signals for weekly triage and human review; never change live ranking automatically. GitHub Pages needs a separate private receiving API before any feedback button can actually save a submission. See the [decision record](Feedback/session-log.md).
+
 ## Current scope
 
 The first session prepared 91,667 DOAB book records from its direct repository export. Code is in `src/libraries_data`; test fixtures are synthetic. The [shared output](https://huggingface.co/datasets/Tox1/LibrariesBookData/commit/daba70f6e6de9f7a5c9a1f830fd255415c6d6bb7) is in `Tox1/LibrariesBookData`, and `HF_TOKEN` is stored as a GitHub Actions repository secret. The [publication run](https://github.com/VeedantBrahmbhatt/Libraries/actions/runs/43653263362) passed.

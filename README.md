@@ -8,6 +8,8 @@ The current phase adds a free public browser demo. It can search **1,884 selecte
 
 A live E5 small query has shown that the site can return ranked cards, but its small sample can miss a requested topic. In particular, `chinese culture` produced broad China-related results with weak fit. The browser demo now removes source placeholders such as `undefined` from summaries and omits books without a usable description. Treat the page as a working interface prototype, not a proven recommendation-quality demo.
 
+The next proposed phase is a [public visitor feedback loop](Documentation/Feedback/design.md): per-book ratings and a whole-list none-fit signal, privately collected and human-reviewed before any search change. The [build sequence](Documentation/Feedback/roadmap.md) is a plan only; feedback collection is not yet live. Because the site has no login, submissions would be visitor reports rather than verified NYU student judgments.
+
 ## Repository guide
 
 | Path | Purpose |
@@ -32,6 +34,7 @@ A live E5 small query has shown that the site can return ranked cards, but its s
 | `Documentation/Model/` | Model choice, pinned version, encoding method, and limits |
 | `Documentation/Evaluation/` | Evaluation design, cloud runbook, session record, and provisional targets |
 | `Documentation/UI/` | Interface design, implementation plan, demo runbook, and phase record |
+| `Documentation/Feedback/` | Proposed public feedback design, build sequence, and decision record |
 | `Documentation/HANDOVER.md` | How to continue the project |
 
 ## Run and update
