@@ -7,6 +7,8 @@ export interface FeedbackState {
   receipt?: Receipt;
   rating?: Rating;
   reason?: Reason | null;
+  savedRating?: Rating;
+  savedReason?: Reason | null;
   editing?: boolean;
 }
 
@@ -70,9 +72,11 @@ export function createFeedbackWidget(
     }
 
     if (wholeList) {
-      nodes.push(button('Tell us none fit', 'feedback-option', () => {
+      const noneFit = button('Tell us none fit', 'feedback-option', () => {
         state.rating = 'none_fit'; message = ''; draw();
-      }));
+      });
+      noneFit.disabled = busy;
+      nodes.push(noneFit);
     } else {
       const choices = document.createElement('div');
       choices.className = 'feedback-choices';
@@ -83,6 +87,7 @@ export function createFeedbackWidget(
           state.rating = rating; message = ''; draw();
         });
         choice.setAttribute('aria-pressed', String(state.rating === rating));
+        choice.disabled = busy;
         choices.append(choice);
       }
       nodes.push(choices);
@@ -115,6 +120,8 @@ export function createFeedbackWidget(
       send.disabled = busy;
       nodes.push(notice, send);
       if (state.receipt) nodes.push(button('Cancel change', 'feedback-link', () => {
+        state.rating = state.savedRating;
+        state.reason = state.savedReason;
         state.editing = false; message = ''; draw();
       }));
     }
@@ -132,6 +139,8 @@ export function createFeedbackWidget(
       } else {
         state.receipt = await sendFeedback(buildSubmission(context(), targetBookId, state.rating, reason));
       }
+      state.savedRating = state.rating;
+      state.savedReason = reason;
       state.editing = false;
       state.reason = reason;
     } catch (error) {
@@ -149,6 +158,8 @@ export function createFeedbackWidget(
       state.receipt = undefined;
       state.rating = undefined;
       state.reason = null;
+      state.savedRating = undefined;
+      state.savedReason = null;
       state.editing = false;
       message = 'Your feedback was deleted.';
     } catch (error) {
