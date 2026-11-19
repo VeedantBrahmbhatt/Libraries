@@ -1,6 +1,6 @@
 # Public recommendation feedback: implemented design
 
-**Status:** Feedback collection is implemented on the purpose branch. The separate API is deployed at `https://violet-library-feedback.fabled-tetra-1279.chatgpt.site`; the GitHub Pages UI is connected after this branch's Pages deployment. No model update has been made.
+**Status:** Feedback collection is live in the [browser demo](https://veedantbrahmbhatt.github.io/Libraries/). The separate API is deployed at `https://violet-library-feedback.fabled-tetra-1279.chatgpt.site` with private D1 storage. No model update has been made.
 
 ## Decision and scope
 
