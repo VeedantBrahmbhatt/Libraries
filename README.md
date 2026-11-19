@@ -1,6 +1,10 @@
 # Libraries
 
-Libraries is an NYU-focused prototype for discovering open-access books. The repository contains **data preparation**, a project-owned **keyword and multilingual semantic search baseline**, and a **search-quality evaluation pilot**. A student-facing interface is a later phase.
+Libraries is an independent, NYU-inspired prototype for discovering open-access books. The repository contains **data preparation**, project-owned **keyword and multilingual semantic search**, search-quality evaluations, and a [live browser demo](https://veedantbrahmbhatt.github.io/Libraries/).
+
+## Public demo and feedback
+
+The live demo searches a 1,884-book sample in the visitor's browser, shows five recommendations first and up to ten on request, and now accepts optional per-book and whole-list feedback from any visitor. Ratings go to a separate private database; they do not automatically change rankings. The [release branch README](https://github.com/VeedantBrahmbhatt/Libraries/blob/build-nyu-search-demo/README.md) and [feedback runbook](https://github.com/VeedantBrahmbhatt/Libraries/blob/build-nyu-search-demo/Documentation/Feedback/runbook.md) contain the current code map, operating steps, and limitations. This `main` branch retains the earlier research baseline; the deployed app source is on `build-nyu-search-demo`, with its latest feedback work developed on `add-public-feedback-loop`.
 
 ## Current phase
 
