@@ -5,6 +5,9 @@ import { buildSearchIndex, rankBooks, rankKeywordBooks } from './search';
 import type { Catalog } from './catalog';
 import type { ModelKey, SearchHit, SearchMode } from './types';
 import { cleanDescription } from './book-text';
+import { createFeedbackWidget } from './feedback/widget';
+import type { FeedbackState } from './feedback/widget';
+import type { FeedbackContext } from './feedback/client';
 
 function byId<T extends HTMLElement>(id: string): T {
   const element = document.getElementById(id);
@@ -26,6 +29,7 @@ const list = byId<HTMLDivElement>('results-list');
 const subtitle = byId<HTMLParagraphElement>('results-subtitle');
 const modelLabel = byId<HTMLDivElement>('results-model');
 const more = byId<HTMLButtonElement>('more-button');
+const listFeedback = byId<HTMLDivElement>('list-feedback');
 const voice = byId<HTMLButtonElement>('voice-button');
 
 let catalog: Catalog | null = null;
@@ -34,6 +38,31 @@ let worker: Worker | null = null;
 let nextId = 1;
 let currentHits: SearchHit[] = [];
 let visibleCount = 5;
+let activeQuery = '';
+let activeModel: ModelKey | 'keyword-only' = DEFAULT_MODEL;
+let activeMode: SearchMode | 'keyword-only' = 'hybrid';
+let feedbackStates = new Map<string, FeedbackState>();
+
+function feedbackContext(): FeedbackContext {
+  if (!catalog) throw new Error('The book catalog is unavailable.');
+  return {
+    query: activeQuery,
+    model: activeModel,
+    mode: activeMode,
+    release: import.meta.env.VITE_RELEASE_ID ?? 'local',
+    catalogSha256: catalog.manifest.files['catalog.json'].sha256,
+    shownBooks: currentHits.slice(0, visibleCount).map(hit => ({ bookId: hit.book.id, rank: hit.rank })),
+  };
+}
+
+function feedbackState(key: string): FeedbackState {
+  let state = feedbackStates.get(key);
+  if (!state) {
+    state = {};
+    feedbackStates.set(key, state);
+  }
+  return state;
+}
 
 function setStatus(message: string, error = false): void {
   status.hidden = !message;
@@ -108,7 +137,8 @@ function renderCard(hit: SearchHit): HTMLElement {
     tag.textContent = subject.length > 45 ? `${subject.slice(0, 42)}…` : subject;
     tags.append(tag);
   }
-  content.append(title, meta, summary, tags);
+  content.append(title, meta, summary, tags,
+    createFeedbackWidget(hit.book.id, feedbackState(hit.book.id), feedbackContext));
 
   const side = document.createElement('div');
   side.className = 'book-side';
@@ -131,6 +161,8 @@ function renderCard(hit: SearchHit): HTMLElement {
 
 function renderHits(): void {
   list.replaceChildren(...currentHits.slice(0, visibleCount).map(renderCard));
+  listFeedback.replaceChildren(...(currentHits.length
+    ? [createFeedbackWidget(null, feedbackState('whole-list'), feedbackContext)] : []));
   more.hidden = currentHits.length <= visibleCount;
   subtitle.textContent = `Showing ${Math.min(visibleCount, currentHits.length)} of ${currentHits.length} results from ${catalog?.books.length.toLocaleString() ?? 'the'} demo books. Top relative score = 100; these are not confidence percentages.`;
   if (!currentHits.length) setStatus('No books in this sample matched. Try a broader request.', false);
@@ -152,9 +184,14 @@ async function search(): Promise<void> {
   }
   const model = selectedModel();
   const mode = modeSelect.value as SearchMode;
+  activeQuery = text;
+  activeModel = model;
+  activeMode = mode;
+  feedbackStates = new Map();
   results.hidden = false;
   currentHits = [];
   list.replaceChildren();
+  listFeedback.replaceChildren();
   more.hidden = true;
   setBusy(true);
   setStatus(`Preparing ${MODELS[model].label}. First use may download about ${MODELS[model].downloadMb} MB.`);
@@ -191,6 +228,9 @@ async function search(): Promise<void> {
       preview.addEventListener('click', () => {
         currentHits = rankKeywordBooks(text, searchIndex!);
         visibleCount = 5;
+        activeModel = 'keyword-only';
+        activeMode = 'keyword-only';
+        feedbackStates = new Map();
         modelLabel.textContent = 'Keyword-only preview · model unavailable';
         setStatus('');
         renderHits();

@@ -8,7 +8,7 @@ The current phase adds a free public browser demo. It can search **1,884 selecte
 
 A live E5 small query has shown that the site can return ranked cards, but its small sample can miss a requested topic. In particular, `chinese culture` produced broad China-related results with weak fit. The browser demo now removes source placeholders such as `undefined` from summaries and omits books without a usable description. Treat the page as a working interface prototype, not a proven recommendation-quality demo.
 
-The next proposed phase is a [public visitor feedback loop](Documentation/Feedback/design.md): per-book ratings and a whole-list none-fit signal, privately collected and human-reviewed before any search change. The [build sequence](Documentation/Feedback/roadmap.md) is a plan only; feedback collection is not yet live. Because the site has no login, submissions would be visitor reports rather than verified NYU student judgments.
+The current purpose branch adds a [public visitor feedback loop](Documentation/Feedback/design.md): per-book ratings, optional fixed reasons, and a whole-list none-fit signal. A separate [feedback service](feedback-api/README.md) saves submissions privately; the [runbook](Documentation/Feedback/runbook.md) covers release and human review. Feedback does not change search results automatically. Because there is no login, submissions are visitor reports rather than verified NYU student judgments. The service is deployed; the UI goes live when this branch's Pages workflow succeeds.
 
 ## Repository guide
 
@@ -18,6 +18,7 @@ The next proposed phase is a [public visitor feedback loop](Documentation/Feedba
 | `src/libraries_search/` | Keyword and meaning-based index building, publishing, and query ranking |
 | `src/libraries_evaluation/` | Comparable search runs, human-review pool, and judged scoring |
 | `frontend/` | Public browser demo, compact sample, model loader, owned ranking, and frontend tests |
+| `feedback-api/` | Separate public submission API, private database migration, strict validation, and service tests |
 | `evaluation/queries/` | Authored pilot and book-derived questions; no student details |
 | `evaluation/review/pilot/` | Twelve small, shared CSV sheets for human grading of the pilot candidates |
 | `evaluation/review/query-fit-v2/` | Fifty DOAB and nineteen textbook review sheets, with pinned manifests and blank human grades |
@@ -34,7 +35,7 @@ The next proposed phase is a [public visitor feedback loop](Documentation/Feedba
 | `Documentation/Model/` | Model choice, pinned version, encoding method, and limits |
 | `Documentation/Evaluation/` | Evaluation design, cloud runbook, session record, and provisional targets |
 | `Documentation/UI/` | Interface design, implementation plan, demo runbook, and phase record |
-| `Documentation/Feedback/` | Proposed public feedback design, build sequence, and decision record |
+| `Documentation/Feedback/` | Feedback design, build sequence, release/review runbook, and decision record |
 | `Documentation/HANDOVER.md` | How to continue the project |
 
 ## Run and update
@@ -42,6 +43,8 @@ The next proposed phase is a [public visitor feedback loop](Documentation/Feedba
 ### Browser demo
 
 The [UI runbook](Documentation/UI/runbook.md) covers the public link, model selection, first-use download sizes, local preview, and deployment. In the repository, run `npm ci --prefix frontend`, `npm test --prefix frontend`, then `npm run dev --prefix frontend`. The public site runs the query model and ranking in the visitor's browser; GitHub Pages hosts only static files. Results show five books first and up to ten after “More options.” If a model download fails, an explicitly labeled keyword-only preview is available. The displayed number sets the top book to 100 within that search; it is **not a confidence probability**. The demo has no student login or stored profile.
+
+On the feedback release, visitors can rate individual results or say none fit. A submitted rating sends the question and displayed book IDs to a separate API; browsing and searching alone do not submit feedback. The [feedback runbook](Documentation/Feedback/runbook.md) explains storage, privacy limits, deployment order, retention, and the manual evaluation loop. Anonymous feedback is a diagnostic signal and has not improved or retrained a model yet.
 
 See [the data preparation runbook](Documentation/Data-Preparation/runbook.md) for exact setup, commands, publishing steps, and troubleshooting. The GitHub Actions workflow is the intended way to publish: it uses the `HF_TOKEN` repository secret and temporary runner storage. It runs after data-preparation changes reach `main`, and can also be started manually.
 

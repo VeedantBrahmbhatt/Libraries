@@ -8,3 +8,12 @@
 4. Chose a replaceable feedback API/private database boundary because static GitHub Pages cannot receive submissions. Cloudflare Worker plus D1 is the free pilot candidate, not a deployment decision or a guarantee of production capacity.
 5. Required human review and frozen evaluation before any feedback-derived ranking or model change. Public anonymous ratings are diagnostic signals, not verified student labels.
 6. Wrote [the proposed design](design.md) and [build sequence](roadmap.md). No application or infrastructure code was changed, and no feedback is currently collected.
+
+## 2026-11-19 — `add-public-feedback-loop`
+
+1. Built `feedback-api/` as a separate Sites Worker with a private D1 database. Its schema stores each rating, an audit event, and a daily rate counter. Generated the known-book allowlist from the checksum-verified 1,884-book frontend catalog so arbitrary book IDs are rejected.
+2. Added strict payload validation, exact Pages-origin CORS, a 4 KB body cap, 20-submission daily per-IP limit, retry deduplication, correction and deletion receipts, and 90-day retention cleanup. The secret rate key is in Sites runtime configuration, not Git. The API has no public feedback-read route.
+3. Added browser controls for each book and for “none fit,” optional fixed reasons, a submission notice, save status, correction, deletion, and retryable error messages. Search and model ranking still happen only in the browser; feedback does not update ranking automatically.
+4. Added API contract and migration tests plus frontend payload tests. Locally verified 10 API tests, 10 frontend tests, the frontend production build, and the Worker artifact build. A live API smoke request returned 201 and its deletion returned 204; the health endpoint returned 200.
+5. Published the Worker as a public Site so any visitor can submit, while its D1 database remains private. Added the public API URL to the Pages build and a nightly retention workflow. Public anonymous feedback has no bot challenge and remains low-trust until reviewed.
+6. Updated the root README, handover, design and runbook. The public Pages deployment and its verification are recorded below when complete.

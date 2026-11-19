@@ -1,6 +1,6 @@
-# Public recommendation feedback: proposed design
+# Public recommendation feedback: implemented design
 
-**Status:** Design proposal only. No feedback collection, database, or model update has been deployed.
+**Status:** Feedback collection is implemented on the purpose branch. The separate API is deployed at `https://violet-library-feedback.fabled-tetra-1279.chatgpt.site`; the GitHub Pages UI is connected after this branch's Pages deployment. No model update has been made.
 
 ## Decision and scope
 
@@ -14,7 +14,7 @@ Each displayed book card offers **Looks useful**, **Partly fits**, and **Does no
 
 The first rating shows a short notice: submitting sends the current question, the shown book IDs and positions, and the selected rating to the project team for search improvement. The visitor may cancel. No feedback is sent merely because someone searched, viewed, or opened a book. There is no free-text comment in the first public release; this limits personal-information exposure and spam. A later comment field needs a separate moderation and privacy review.
 
-The interface acknowledges a saved rating, permits a correction in the same browser session, and offers a random receipt that can be used to request deletion. If feedback is unavailable, search results still render and a clear retry message appears. The visible relevance number remains a relative ranking score, not a measure of whether the visitor is right.
+The interface acknowledges a saved rating, permits a correction or deletion in the same browser session, and keeps its receipt in memory only. If feedback is unavailable, search results still render and a clear retry message appears. The visible relevance number remains a relative ranking score, not a measure of whether the visitor is right.
 
 ## Data flow and boundaries
 
@@ -28,15 +28,15 @@ flowchart LR
   F --> G[Versioned release or rollback]
 ```
 
-GitHub Pages remains the static UI. A separate small HTTPS API accepts feedback into a private database. The proposed free pilot is a Cloudflare Worker with D1, subject to account setup and current free limits; the storage provider does **not** choose search candidates or rank books. The API is a replaceable boundary so the team can move to an institution-approved service later. GitHub Pages cannot run the receiving API itself. [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site), [Workers limits](https://developers.cloudflare.com/workers/platform/limits/), [D1 limits](https://developers.cloudflare.com/d1/platform/limits/).
+GitHub Pages remains the static UI. A separate Cloudflare Worker and private D1 database, provisioned by the connected Sites project, accept feedback; they do **not** choose search candidates or rank books. The API is a replaceable boundary so the team can move to an institution-approved service later. Current free-service quotas and availability are not guaranteed. GitHub Pages cannot run the receiving API itself. [GitHub Pages](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site), [Workers limits](https://developers.cloudflare.com/workers/platform/limits/), [D1 limits](https://developers.cloudflare.com/d1/platform/limits/).
 
-On the first submitted rating, the browser sends one search snapshot: trimmed query (maximum 500 characters), displayed book IDs and positions (at most ten), selected model and mode, catalog checksum, ranking release, and a random idempotency key. The server assigns a search ID and stores the rating with that snapshot. Later ratings for the same search refer to that ID. The server validates known book IDs, allowed values, payload size, and version fields; it never trusts client-supplied scores as proof of relevance. A correction creates an auditable new rating state without double-counting the old one. No NYU email, student ID, major, course record, persistent device ID, or profile is stored by the application.
+Each submitted rating sends a search snapshot: trimmed query (maximum 500 characters), displayed book IDs and positions (at most ten), selected model and mode, catalog checksum, ranking release, and a random idempotency key. Every rating carries its own snapshot; the API does not link ratings into a session or profile. The server validates known book IDs, allowed values, payload size, and version fields; it never trusts client-supplied scores as proof of relevance. A correction updates the current rating and records an audit event without double-counting the old one. No NYU email, student ID, major, course record, persistent device ID, or profile is stored by the application.
 
 The database is private. The public site receives only submission status and its own receipt; it cannot read other visitors' feedback. Raw questions and ratings do not enter the public GitHub repository, Actions artifacts, or logs. Limit access to named maintainers, document who can export data, and remove raw submissions after a proposed 90-day review window unless a visitor deletes them sooner. Keep only reviewed, minimized research examples for longer use, with a separate retention decision. Platform-level logs and data-location terms must be checked before accepting real student use. [NIST minimization principle](https://csrc.nist.gov/glossary/term/minimization).
 
 ## Public endpoint controls
 
-Use HTTPS; allow the exact Pages origin for browser requests; verify a bot challenge server-side; enforce request-size, rate, and daily limits; and deduplicate retries with the idempotency key. Origin/CORS checks do not authenticate callers. Reject unknown catalog IDs, malformed ratings, oversized text, and mismatched search snapshots. Monitor rejection and failure rates. On a free-tier cap, stop accepting feedback cleanly rather than weakening limits. These controls follow [OWASP's guidance on API resource limits](https://api-security.owasp.org/editions/2023/en/0xa4-unrestricted-resource-consumption/). Anonymous public voting remains susceptible to coordinated manipulation, so ratings cannot serve as verified human labels by themselves.
+The current service uses HTTPS, checks the exact Pages origin for browser requests, enforces request size and daily per-IP limits, and deduplicates retries with the idempotency key. Origin/CORS checks do not authenticate callers; a bot challenge is **not** yet present. Unknown catalog IDs, malformed ratings, oversized text, and mismatched catalog versions are rejected. On a free-tier cap, stop accepting feedback cleanly rather than weakening limits. These controls follow [OWASP's guidance on API resource limits](https://api-security.owasp.org/editions/2023/en/0xa4-unrestricted-resource-consumption/). Anonymous public voting remains susceptible to coordinated manipulation, so ratings cannot serve as verified human labels by themselves.
 
 ## How feedback improves search
 
