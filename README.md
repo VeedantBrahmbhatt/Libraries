@@ -36,9 +36,12 @@ The [live browser demo](https://veedantbrahmbhatt.github.io/Libraries/) now incl
 | `Documentation/Evaluation/` | Evaluation design, cloud runbook, session record, and provisional targets |
 | `Documentation/UI/` | Interface design, implementation plan, demo runbook, and phase record |
 | `Documentation/Feedback/` | Feedback design, build sequence, release/review runbook, and decision record |
+| `Documentation/Presentation/` | Editable technical slide deck, PDF preview, speaker notes, and sources |
 | `Documentation/HANDOVER.md` | How to continue the project |
 
 ## Run and update
+
+The [technical presentation](Documentation/Presentation/README.md) gives a 14-slide stakeholder overview with architecture diagrams, model diagnostics, blockers, and the current deployment. Its PowerPoint is editable, and the PDF is ready to present or share.
 
 ### Browser demo
 

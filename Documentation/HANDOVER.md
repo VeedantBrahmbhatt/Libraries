@@ -1,5 +1,9 @@
 # Project handover
 
+## Technical presentation
+
+The [14-slide technical deck](Presentation/README.md) is available as an editable PowerPoint and a PDF preview. It traces the full catalog, browser sample, own-code ranking, three model diagnostics, engineering blockers, deployment, and feedback loop. Speaker notes cite the source files for measured claims. Keep its scope labels and figures aligned with later releases.
+
 ## Browser demo phase
 
 Purpose branch `build-nyu-search-demo` adds a responsive, independent NYU-inspired UI in `frontend/` and a pinned, checksum-verified **1,884-book** sample in `frontend/public/data/`. The [UI runbook](UI/runbook.md), [design](UI/design.md), [plan](UI/implementation-plan.md), and [session record](UI/session-log.md) explain the full flow. Browser inference uses E5 small, E5 base, or GTE base; the project ranks the sample itself with semantic scoring or reciprocal-rank fusion of semantic and keyword ranks. Default GTE hybrid follows the previous full-catalog assistant diagnostic (19/50), but the browser sample is selected from those evaluation result pools and does **not** inherit that quality score. First-use model downloads are substantial. No full catalog, full vectors, model weights, or student profiles are committed. GitHub Pages deploys the static site from the purpose branch; see the runbook for the exact meeting procedure and limitations.
